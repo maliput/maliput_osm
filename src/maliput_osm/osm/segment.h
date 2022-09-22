@@ -45,11 +45,26 @@ namespace osm {
 
 using SegmentId = maliput::api::TypeSpecificIdentifier<class Segment>;
 
+/// Abstraction for a road segment obtained from a osm map.
+/// A segment is a collection of lanes added with a strict order, from right to left,
+/// similarly to maliput::api::Segment abstraction.
+///
+/// A lanelet2-osm based map is composed by lanelets that could have adjacent lanes. The collection
+/// of adjacent lanes are expected to be grouped in the Segment abstraction.
 class Segment {
  public:
+  /// @param id Id of the lane.
+  /// @param lanes Lanes in the segment added from left to right.
+  /// @throws maliput::common::assertion_error When @p lanes is empty.
   Segment(const SegmentId& id, const std::map<LaneId, Lane>& lanes) : id_(id), lanes_(lanes) {
     MALIPUT_THROW_UNLESS(!lanes_.empty());
   }
+
+  /// @param id Id of the lane.
+  /// @param lanes Lanes in the segment added from right to left.
+  /// @param successors Ids of the lanes that are successors of this lane.
+  /// @param predecessors Ids of the lanes that are predecessors of this lane.
+  /// @throws maliput::common::assertion_error When @p lanes is empty.
   Segment(const SegmentId& id, const std::map<LaneId, Lane>& lanes, const std::vector<SegmentId>& successors,
           const std::vector<SegmentId>& predecessors)
       : id_(id), lanes_(lanes), successors_(successors), predecessors_(predecessors) {
