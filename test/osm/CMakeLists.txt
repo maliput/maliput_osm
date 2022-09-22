@@ -1,0 +1,4 @@
+ament_add_gtest(lane_test lane_test.cc)
+ament_add_gtest(segment_test segment_test.cc)
+add_dependencies_to_test(lane_test)
+add_dependencies_to_test(segment_test)
