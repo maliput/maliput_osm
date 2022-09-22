@@ -12,7 +12,9 @@ if (TARGET ${target})
       )
 
       target_link_libraries(${target}
-          maliput_osm::osm
+        maliput::api
+        maliput::common
+        maliput_sparse::geometry
       )
 
     endif()
