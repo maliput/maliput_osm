@@ -29,96 +29,40 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
-#include <memory>
 #include <optional>
 #include <string>
 #include <vector>
 
-#include <maliput/api/type_specific_identifier.h>
-#include <maliput/common/maliput_copyable.h>
 #include <maliput_sparse/geometry/line_string.h>
 
 namespace maliput_osm {
 namespace osm {
 
-using LaneId = maliput::api::TypeSpecificIdentifier<class Lane>;
+using LaneId = std::string;
 
 /// A lane in an Lanelet2-OSM road.
-class Lane {
- public:
-  /// Constructs a Lane
-  /// @param id Id of the lane.
-  /// @param left Left polyline describing the left boundary of the lane.
-  /// @param right Right polyline describing the right boundary of the lane.
-  Lane(const LaneId& id, const maliput_sparse::geometry::LineString3d& left,
-       const maliput_sparse::geometry::LineString3d& right)
-      : id_(id), left_(left), right_(right) {}
-
-  /// Constructs a Lane
-  /// @param id Id of the lane.
-  /// @param left Left polyline describing the left boundary of the lane.
-  /// @param right Right polyline describing the right boundary of the lane.
-  /// @param left_lane_id Id of the lane to the left of this lane.
-  /// @param right_lane_id Id of the right to the left of this lane.
-  /// @param successors Ids of the lanes that are successors of this lane.
-  /// @param predecessors Ids of the lanes that are predecessors of this lane.
-  Lane(const LaneId& id, const maliput_sparse::geometry::LineString3d& left,
-       const maliput_sparse::geometry::LineString3d& right, const std::optional<LaneId>& left_lane_id,
-       const std::optional<LaneId>& right_lane_id, const std::vector<LaneId>& successors,
-       const std::vector<LaneId>& predecessors)
-      : id_(id),
-        left_(left),
-        right_(right),
-        left_lane_id_(left_lane_id),
-        right_lane_id_(right_lane_id),
-        successors_(successors),
-        predecessors_(predecessors) {}
-
-  /// Returns the id of the lane.
-  const LaneId& id() const { return id_; }
-  /// Returns the left polyline describing the left boundary of the lane.
-  const maliput_sparse::geometry::LineString3d& left() const { return left_; }
-  /// Returns the right polyline describing the right boundary of the lane.
-  const maliput_sparse::geometry::LineString3d& right() const { return right_; }
-
-  /// Set the id of the lane to the left of this lane.
-  /// @param left_lane_id Left LaneId.
-  void set_left_lane_id(const std::optional<LaneId>& left_lane_id) { left_lane_id_ = left_lane_id; }
-  /// Set the id of the lane to the right of this lane.
-  /// @param right_lane_id Right LaneId.
-  void set_right_lane_id(const std::optional<LaneId>& right_lane_id) { right_lane_id_ = right_lane_id; }
-  /// @returns The id of the lane to the left of this lane.
-  const std::optional<LaneId>& get_left_lane_id() const { return left_lane_id_; }
-  /// @returns The id of the lane to the right of this lane.
-  const std::optional<LaneId>& get_right_lane_id() const { return right_lane_id_; }
-
-  /// Set the ids of the lanes that succeed this lane.
-  /// @param successors Successors.
-  void set_successors(const std::vector<LaneId>& successors) { successors_ = successors; }
-  /// Set the ids of the lanes that precede this lane.
-  /// @param predecessors Predecessors.
-  void set_predecessors(const std::vector<LaneId>& predecessors) { predecessors_ = predecessors; }
-  /// @returns The ids of the lanes that succeed this lane.
-  const std::vector<LaneId>& get_successors() const { return successors_; }
-  /// @returns The ids of the lanes that precede this lane.
-  const std::vector<LaneId>& get_predecessors() const { return predecessors_; }
-
+struct Lane {
   /// Equality operator.
-  /// @param other Other Lane.
+  /// @param other The other object to compare against.
   bool operator==(const Lane& other) const {
-    return id_ == other.id_ && left_ == other.left_ && right_ == other.right_ && left_lane_id_ == other.left_lane_id_ &&
-           right_lane_id_ == other.right_lane_id_ && successors_ == other.successors_ &&
-           predecessors_ == other.predecessors_;
+    return id == other.id && left == other.left && right == other.right && left_lane_id == other.left_lane_id &&
+           right_lane_id == other.right_lane_id && successors == other.successors && predecessors == other.predecessors;
   }
 
- private:
-  const LaneId id_;
-  const maliput_sparse::geometry::LineString3d left_;
-  const maliput_sparse::geometry::LineString3d right_;
-  std::optional<LaneId> left_lane_id_;
-  std::optional<LaneId> right_lane_id_;
-  std::vector<LaneId> successors_;
-  std::vector<LaneId> predecessors_;
+  /// Id of the lane.
+  LaneId id{};
+  /// The lane's left boundary.
+  maliput_sparse::geometry::LineString3d left;
+  /// The lane's right boundary.
+  maliput_sparse::geometry::LineString3d right;
+  /// The id of the lane to the left of this lane.
+  std::optional<LaneId> left_lane_id;
+  /// The id of the lane to the right of this lane.
+  std::optional<LaneId> right_lane_id;
+  /// The ids of the lanes that follow this lane.
+  std::vector<LaneId> successors;
+  /// The ids of the lanes that precede this lane.
+  std::vector<LaneId> predecessors;
 };
 
 }  // namespace osm

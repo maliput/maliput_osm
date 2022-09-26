@@ -55,34 +55,16 @@ class LaneTest : public ::testing::Test {
 };
 
 TEST_F(LaneTest, Test) {
-  EXPECT_NO_THROW(Lane(id, left, right));
-  EXPECT_NO_THROW(Lane(id, left, right, left_lane_id, right_lane_id, successors, predecessors));
-
-  Lane lane{id, left, right};
-  EXPECT_EQ(id, lane.id());
-  EXPECT_EQ(left, lane.left());
-  EXPECT_EQ(right, lane.right());
-  EXPECT_EQ(std::nullopt, lane.get_left_lane_id());
-  EXPECT_EQ(std::nullopt, lane.get_right_lane_id());
-
-  const Lane lane_2{id, left, right, left_lane_id, right_lane_id, successors, predecessors};
-  EXPECT_EQ(lane_2.id(), lane.id());
-  EXPECT_EQ(lane_2.left(), lane.left());
-  EXPECT_EQ(lane_2.right(), lane.right());
-  EXPECT_EQ(left_lane_id, lane_2.get_left_lane_id());
-  EXPECT_EQ(right_lane_id, lane_2.get_right_lane_id());
-  EXPECT_EQ(successors, lane_2.get_successors());
-  EXPECT_EQ(predecessors, lane_2.get_predecessors());
-
-  lane.set_left_lane_id(left_lane_id);
-  lane.set_right_lane_id(right_lane_id);
-  EXPECT_EQ(left_lane_id, lane.get_left_lane_id());
-  EXPECT_EQ(right_lane_id, lane.get_right_lane_id());
-  lane.set_successors(successors);
-  lane.set_predecessors(predecessors);
-  EXPECT_EQ(successors, lane.get_successors());
-  EXPECT_EQ(predecessors, lane.get_predecessors());
-  EXPECT_EQ(lane_2, lane);
+  const Lane dut{id, left, right, left_lane_id, right_lane_id, successors, predecessors};
+  EXPECT_EQ(id, dut.id);
+  EXPECT_EQ(left, dut.left);
+  EXPECT_EQ(right, dut.right);
+  EXPECT_EQ(left_lane_id, dut.left_lane_id);
+  EXPECT_EQ(right_lane_id, dut.right_lane_id);
+  EXPECT_EQ(successors, dut.successors);
+  EXPECT_EQ(predecessors, dut.predecessors);
+  const Lane dut2 = dut;
+  EXPECT_EQ(dut, dut2);
 }
 
 }  // namespace

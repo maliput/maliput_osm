@@ -65,26 +65,13 @@ class SegmentTest : public ::testing::Test {
 };
 
 TEST_F(SegmentTest, Test) {
-  EXPECT_THROW(Segment(id_, {}), maliput::common::assertion_error);
-  EXPECT_NO_THROW(Segment(id_, lanes_));
-  EXPECT_NO_THROW(Segment(id_, lanes_, successors_, predecessors_));
-
-  Segment segment{id_, lanes_};
-  EXPECT_EQ(id_, segment.id());
-  EXPECT_EQ(lanes_, segment.lanes());
-  EXPECT_TRUE(segment.get_successors().empty());
-  EXPECT_TRUE(segment.get_predecessors().empty());
-
-  const Segment segment_2{id_, lanes_, successors_, predecessors_};
-  EXPECT_EQ(segment.id(), segment_2.id());
-  EXPECT_EQ(segment.lanes(), segment_2.lanes());
-  EXPECT_EQ(successors_, segment_2.get_successors());
-  EXPECT_EQ(predecessors_, segment_2.get_predecessors());
-  segment.set_successors(successors_);
-  segment.set_predecessors(predecessors_);
-  EXPECT_EQ(successors_, segment.get_successors());
-  EXPECT_EQ(predecessors_, segment.get_predecessors());
-  EXPECT_EQ(segment_2, segment);
+  const Segment dut{id_, lanes_, successors_, predecessors_};
+  EXPECT_EQ(id_, dut.id);
+  EXPECT_EQ(lanes_, dut.lanes);
+  EXPECT_EQ(predecessors_, dut.predecessors);
+  EXPECT_EQ(successors_, dut.successors);
+  const Segment dut2 = dut;
+  EXPECT_EQ(dut, dut2);
 }
 
 }  // namespace
