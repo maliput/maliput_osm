@@ -31,17 +31,17 @@
 
 #include <optional>
 #include <string>
-#include <vector>
+#include <unordered_set>
 
 #include <maliput_sparse/geometry/line_string.h>
 
 namespace maliput_osm {
 namespace osm {
 
-using LaneId = std::string;
-
 /// A lane in an Lanelet2-OSM road.
 struct Lane {
+  using Id = std::string;
+
   /// Equality operator.
   /// @param other The other object to compare against.
   bool operator==(const Lane& other) const {
@@ -50,19 +50,19 @@ struct Lane {
   }
 
   /// Id of the lane.
-  LaneId id{};
+  Id id{};
   /// The lane's left boundary.
   maliput_sparse::geometry::LineString3d left;
   /// The lane's right boundary.
   maliput_sparse::geometry::LineString3d right;
   /// The id of the lane to the left of this lane.
-  std::optional<LaneId> left_lane_id;
+  std::optional<Id> left_lane_id;
   /// The id of the lane to the right of this lane.
-  std::optional<LaneId> right_lane_id;
+  std::optional<Id> right_lane_id;
   /// The ids of the lanes that follow this lane.
-  std::vector<LaneId> successors;
+  std::unordered_set<Id> successors;
   /// The ids of the lanes that precede this lane.
-  std::vector<LaneId> predecessors;
+  std::unordered_set<Id> predecessors;
 };
 
 }  // namespace osm

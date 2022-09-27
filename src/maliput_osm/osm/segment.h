@@ -29,7 +29,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
-#include <map>
 #include <string>
 #include <vector>
 
@@ -40,8 +39,6 @@
 namespace maliput_osm {
 namespace osm {
 
-using SegmentId = std::string;
-
 /// Abstraction for a road segment obtained from a osm map.
 /// A segment is a collection of lanes added with a strict order, from right to left,
 /// similarly to maliput::api::Segment abstraction.
@@ -49,22 +46,16 @@ using SegmentId = std::string;
 /// A lanelet2-osm based map is composed by lanelets that could have adjacent lanes. The collection
 /// of adjacent lanes are expected to be grouped in the Segment abstraction.
 struct Segment {
- public:
+  using Id = std::string;
+
   /// Equality operator.
   /// @param other The other object to compare against.
-  bool operator==(const Segment& other) const {
-    return id == other.id && lanes == other.lanes && successors == other.successors &&
-           predecessors == other.predecessors;
-  }
+  bool operator==(const Segment& other) const { return id == other.id && lanes == other.lanes; }
 
   /// Id of the segment.
-  SegmentId id;
+  Id id;
   /// Collection of lanes that compose the segment.
-  std::map<LaneId, Lane> lanes;
-  /// The ids of the segments that follow this segment.
-  std::vector<SegmentId> successors;
-  /// The ids of the segments that precede this segment.
-  std::vector<SegmentId> predecessors;
+  std::vector<Lane> lanes;
 };
 
 }  // namespace osm

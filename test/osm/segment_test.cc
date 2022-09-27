@@ -47,29 +47,25 @@ using maliput_sparse::geometry::LineString3d;
 
 class SegmentTest : public ::testing::Test {
  protected:
-  static Lane CreateLane(const LaneId& id) {
+  static Lane CreateLane(const Lane::Id& id) {
     static const LineString3d left{{1., 1., 1.}, {10., 1., 1.}};
     static const LineString3d right{{1., -1., 1.}, {10., -1., 1.}};
-    static const std::optional<LaneId> left_lane_id{"left_lane_id"};
-    static const std::optional<LaneId> right_lane_id{"right_lane_id"};
-    static const std::vector<LaneId> successors{LaneId{"successor_1"}, LaneId{"successor_2"}};
-    static const std::vector<LaneId> predecessors{LaneId{"predecessor_1"}, LaneId{"predecessor_2"}};
-    return {id, left, right, left_lane_id, right_lane_id, successors, predecessors};
+    static const std::optional<Lane::Id> left_lane_id{"left_lane_id"};
+    static const std::optional<Lane::Id> right_lane_id{"right_lane_id"};
+    return {id, left, right, left_lane_id, right_lane_id};
   }
 
-  const SegmentId id_{"segment_id"};
-  const std::map<LaneId, Lane> lanes_{{LaneId{"lane_1"}, CreateLane(LaneId{"lane_1"})},
-                                      {LaneId{"lane_1"}, CreateLane(LaneId{"lane_2"})}};
-  const std::vector<SegmentId> successors_{SegmentId{"successor_1"}, SegmentId{"successor_2"}};
-  const std::vector<SegmentId> predecessors_{SegmentId{"predecessor_1"}, SegmentId{"predecessor_2"}};
+  const Segment::Id id_{"segment_id"};
+  const std::vector<Lane> lanes_{{CreateLane(Lane::Id{"lane_1"})}, {CreateLane(Lane::Id{"lane_2"})}};
+  const Segment dut{id_, lanes_};
 };
 
-TEST_F(SegmentTest, Test) {
-  const Segment dut{id_, lanes_, successors_, predecessors_};
+TEST_F(SegmentTest, Members) {
   EXPECT_EQ(id_, dut.id);
   EXPECT_EQ(lanes_, dut.lanes);
-  EXPECT_EQ(predecessors_, dut.predecessors);
-  EXPECT_EQ(successors_, dut.successors);
+}
+
+TEST_F(SegmentTest, EqualityOperator) {
   const Segment dut2 = dut;
   EXPECT_EQ(dut, dut2);
 }
