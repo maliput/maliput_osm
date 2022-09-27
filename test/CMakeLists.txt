@@ -15,7 +15,10 @@ if (TARGET ${target})
       target_link_libraries(${target}
         maliput::api
         maliput::common
+        maliput_osm::osm
         maliput_sparse::geometry
+        lanelet2_io::lanelet2_io
+
       )
 
     endif()

@@ -14,6 +14,7 @@ message(STATUS "\n\n====== Finding 3rd Party Packages ======\n")
 find_package(ament_cmake REQUIRED)
 find_package(maliput REQUIRED)
 find_package(maliput_sparse REQUIRED)
+find_package(lanelet2_io REQUIRED)
 
 ##############################################################################
 # Project Configuration
@@ -70,6 +71,13 @@ install(
   DIRECTORY include/
   DESTINATION include
 )
+
+install (DIRECTORY resources
+         DESTINATION share/${PROJECT_NAME})
+
+
+ament_environment_hooks("${CMAKE_CURRENT_SOURCE_DIR}/env-hooks/${PROJECT_NAME}.dsv.in")
+ament_environment_hooks("${CMAKE_CURRENT_SOURCE_DIR}/env-hooks/${PROJECT_NAME}.sh.in")
 
 ament_export_include_directories(include)
 ament_export_dependencies(ament_cmake)

@@ -1,0 +1,35 @@
+<!--
+A straight 2-lane Road with North orientation.
+Origin: (0, 0)
+-->
+<?xml version="1.0"?>
+<osm version="0.6" generator="lanelet2">
+  <node id="1000" visible="true" version="1" lat="-0.00449157642" lon="-0.00003144103" />
+  <node id="1001" visible="true" version="1" lat="0.00449157642" lon="-0.00003144103" />
+  <node id="1003" visible="true" version="1" lat="-0.00449157642" lon="0" />
+  <node id="1004" visible="true" version="1" lat="0.00449157642" lon="0" />
+  <node id="1007" visible="true" version="1" lat="-0.00449157642" lon="0.00003144103" />
+  <node id="1008" visible="true" version="1" lat="0.00449157642" lon="0.00003144103" />
+  <way id="1002" visible="true" version="1">
+    <nd ref="1000" />
+    <nd ref="1001" />
+  </way>
+  <way id="1005" visible="true" version="1">
+    <nd ref="1003" />
+    <nd ref="1004" />
+  </way>
+  <way id="1009" visible="true" version="1">
+    <nd ref="1007" />
+    <nd ref="1008" />
+  </way>
+  <relation id="1006" visible="true" version="1">
+    <member type="way" ref="1002" role="left" />
+    <member type="way" ref="1005" role="right" />
+    <tag k="type" v="lanelet" />
+  </relation>
+  <relation id="1010" visible="true" version="1">
+    <member type="way" ref="1005" role="left" />
+    <member type="way" ref="1009" role="right" />
+    <tag k="type" v="lanelet" />
+  </relation>
+</osm>
