@@ -1,1 +1,3 @@
 add_subdirectory(maliput_osm)
+add_subdirectory(utilities)
+add_subdirectory(test_utilities)

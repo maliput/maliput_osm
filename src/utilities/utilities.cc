@@ -27,44 +27,21 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#pragma once
+#include "utilities/utilities.h"
 
-#include <memory>
-#include <string>
-#include <unordered_map>
+#include <maliput/common/filesystem.h>
+#include <maliput/common/maliput_throw.h>
 
-#include <maliput/common/maliput_copyable.h>
+namespace utilities {
 
-#include "maliput_osm/osm/segment.h"
+std::string FindOSMResource(const std::string& file_name) {
+  static constexpr char MALIPUT_OSM_RESOURCE_ROOT[] = "MALIPUT_OSM_RESOURCE_ROOT";
+  MALIPUT_THROW_UNLESS(!maliput::common::Path{file_name}.is_absolute());
+  maliput::common::Path file_path =
+      maliput::common::Filesystem::get_env_path(MALIPUT_OSM_RESOURCE_ROOT) + "/resources/osm";
+  file_path.append(file_name);
+  // Returns empty string if file_path doesn't match any existing file.
+  return file_path.exists() ? file_path.get_path() : "";
+}
 
-namespace maliput_osm {
-namespace osm {
-
-/// Configuration for the OSM parser.
-struct ParserConfig {
-  /// Lat and lon of the origin of the OSM map.
-  maliput::math::Vector2 origin{0., 0.};
-};
-
-/// OSMManager is in charge of loading a Lanelet2-OSM map, parsing it, and providing
-/// accessors to get the map's important data.
-class OSMManager {
- public:
-  MALIPUT_NO_COPY_NO_MOVE_NO_ASSIGN(OSMManager)
-
-  /// Constructs a OSMManager object.
-  /// @param osm_file_path The path to the OSM file to load.
-  /// @param config The parser configuration.
-  OSMManager(const std::string& osm_file_path, const ParserConfig& config);
-
-  ~OSMManager();
-
-  /// Gets the map's segments.
-  const std::unordered_map<Segment::Id, Segment>& GetOSMSegments() const;
-
- private:
-  std::unordered_map<Segment::Id, Segment> segments_{};
-};
-
-}  // namespace osm
-}  // namespace maliput_osm
+}  // namespace utilities

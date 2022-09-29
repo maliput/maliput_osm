@@ -42,13 +42,12 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
   using namespace lanelet;
   const LaneletMapPtr map = load(osm_file_path, Origin{GPSPoint{config.origin.x(), config.origin.y()}});
 
+  // TODO(#6): Support multiple lanes per segment. Organize adjacent lanes within segments.
+  maliput::log()->warn("Each lane from {} populates only one segment. Lanes are not organized within segments yet.",
+                       osm_file_path);
+
   for (const auto& lanelet : map->laneletLayer) {
     const Lane lane{ToMaliput(lanelet)};
-
-    // TODO(#6): Support multiple lanes per segment. Organize adjacent lanes within segments.
-    maliput::log()->warn("Each lane from {} populates only one segment. Lanes are not organized within segments yet.",
-                         osm_file_path);
-
     const Segment::Id segment_id{"segment_" + std::to_string(lanelet.id())};
     segments_.emplace(segment_id, Segment{segment_id, {lane}});
   }

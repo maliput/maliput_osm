@@ -37,8 +37,18 @@
 namespace maliput_osm {
 namespace osm {
 
+/// Converts a lanelet::ConstLineString3d to a maliput_sparse::geometry::LineString3d.
+/// @param line_string The lanelet::ConstLineString3d to convert.
+/// @returns The converted maliput_sparse::geometry::LineString3d.
 maliput_sparse::geometry::LineString3d ToMaliput(const lanelet::ConstLineString3d& line_string);
 
+/// Converts a lanelet::Lanelet to a maliput_osm::osm::Lane.
+///
+/// maliput_osm::osm::Lane is an struct with several fields.
+/// This method only populates the id, left and right fields.
+///
+/// @param lanelet The lanelet::Lanelet to convert.
+/// @returns The converted maliput_osm::osm::Lane.
 Lane ToMaliput(const lanelet::Lanelet& lanelet);
 
 }  // namespace osm

@@ -29,42 +29,38 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
-#include <memory>
-#include <string>
-#include <unordered_map>
+#include <gtest/gtest.h>
+#include <maliput_sparse/geometry/line_string.h>
 
-#include <maliput/common/maliput_copyable.h>
-
+#include "maliput_osm/osm/lane.h"
 #include "maliput_osm/osm/segment.h"
 
 namespace maliput_osm {
 namespace osm {
+namespace test {
 
-/// Configuration for the OSM parser.
-struct ParserConfig {
-  /// Lat and lon of the origin of the OSM map.
-  maliput::math::Vector2 origin{0., 0.};
-};
+/// Compares two maliput_sparse::geometry::LineString3d objects.
+/// @param lhs The left-hand side of the comparison.
+/// @param rhs The right-hand side of the comparison.
+/// @param tolerance The tolerance to use when comparing floating point values.
+/// @returns A Google Test assertion result.
+::testing::AssertionResult CompareLineString3d(const maliput_sparse::geometry::LineString3d& lhs,
+                                               const maliput_sparse::geometry::LineString3d& rhs, double tolerance);
 
-/// OSMManager is in charge of loading a Lanelet2-OSM map, parsing it, and providing
-/// accessors to get the map's important data.
-class OSMManager {
- public:
-  MALIPUT_NO_COPY_NO_MOVE_NO_ASSIGN(OSMManager)
+/// Compares two osm::Lane objects.
+/// @param lhs The left-hand side of the comparison.
+/// @param rhs The right-hand side of the comparison.
+/// @param tolerance The tolerance to use when comparing floating point values.
+/// @returns A Google Test assertion result.
+::testing::AssertionResult CompareOSMLane(const Lane& lhs, const Lane& rhs, double tolerance);
 
-  /// Constructs a OSMManager object.
-  /// @param osm_file_path The path to the OSM file to load.
-  /// @param config The parser configuration.
-  OSMManager(const std::string& osm_file_path, const ParserConfig& config);
+/// Compares two osm::Segment objects.
+/// @param lhs The left-hand side of the comparison.
+/// @param rhs The right-hand side of the comparison.
+/// @param tolerance The tolerance to use when comparing floating point values.
+/// @returns A Google Test assertion result.
+::testing::AssertionResult CompareOSMSegment(const Segment& lhs, const Segment& rhs, double tolerance);
 
-  ~OSMManager();
-
-  /// Gets the map's segments.
-  const std::unordered_map<Segment::Id, Segment>& GetOSMSegments() const;
-
- private:
-  std::unordered_map<Segment::Id, Segment> segments_{};
-};
-
+}  // namespace test
 }  // namespace osm
 }  // namespace maliput_osm

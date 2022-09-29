@@ -38,6 +38,7 @@
 #include <lanelet2_io/Io.h>
 #include <maliput/common/filesystem.h>
 
+#include "test_utilities/osm_types_compare.h"
 #include "utilities/utilities.h"
 
 using maliput_sparse::geometry::LineString3d;
@@ -85,9 +86,7 @@ TEST_P(OSMMangerTest, Test) {
   for (const auto& case_segment : case_.segments) {
     const auto it = osm_segments.find(case_segment.first);
     ASSERT_TRUE(it != osm_segments.end());
-    EXPECT_EQ(
-        case_segment.second,
-        it->second);  //> This fails because of the parser tolerance (~1e-5). Equality operator should have a tolerance.
+    EXPECT_TRUE(CompareOSMSegment(case_segment.second, it->second, 1e-5));
   }
 }
 
