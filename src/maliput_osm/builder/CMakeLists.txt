@@ -4,6 +4,7 @@
 add_library(builder
   builder_configuration.cc
   road_geometry_builder.cc
+  road_network_builder.cc
 )
 
 add_library(maliput_osm::builder ALIAS builder)
