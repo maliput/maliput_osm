@@ -54,7 +54,7 @@ TEST(ToMaliput, LineString) {
 TEST(ToMaliput, Lanelet) {
   const std::vector<maliput::math::Vector3> points_left{{1., 1., 1.}, {2., 2., 2.}, {3., 3., 3.}};
   const std::vector<maliput::math::Vector3> points_right{{3., 3., 3.}, {4., 4., 4.}, {5., 5., 5.}};
-  constexpr int kLaneIdNumber{10.};
+  constexpr int kLaneIdNumber{10};
   const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
   const Lane lane{lane_id, maliput_sparse::geometry::LineString3d{points_left},
                   maliput_sparse::geometry::LineString3d{points_right}};

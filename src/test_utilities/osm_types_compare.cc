@@ -30,33 +30,20 @@
 #include "test_utilities/osm_types_compare.h"
 
 #include <maliput/test_utilities/maliput_math_compare.h>
+#include <maliput_sparse/test_utilties/maliput_sparse_types_compare.h>
 
 namespace maliput_osm {
 namespace osm {
 namespace test {
 
-::testing::AssertionResult CompareLineString3d(const maliput_sparse::geometry::LineString3d& lhs,
-                                               const maliput_sparse::geometry::LineString3d& rhs, double tolerance) {
-  if (lhs.size() != rhs.size()) {
-    return ::testing::AssertionFailure() << "LineString3d size mismatch: " << lhs.size() << " != " << rhs.size();
-  }
-  for (size_t i = 0; i < lhs.size(); ++i) {
-    if (!maliput::math::test::CompareVectors(lhs[i], rhs[i], tolerance)) {
-      return ::testing::AssertionFailure()
-             << "LineString3d point mismatch at index " << i << ": " << lhs[i] << " != " << rhs[i];
-    }
-  }
-  return ::testing::AssertionSuccess();
-}
-
 ::testing::AssertionResult CompareOSMLane(const Lane& lhs, const Lane& rhs, double tolerance) {
   if (lhs.id != rhs.id) {
     return ::testing::AssertionFailure() << "Lane ids do not match: " << lhs.id << " != " << rhs.id;
   }
-  if (!CompareLineString3d(lhs.left, rhs.left, tolerance)) {
+  if (!maliput_sparse::test::CompareLineString3d(lhs.left, rhs.left, tolerance)) {
     return ::testing::AssertionFailure() << "Lane left boundaries do not match: " << lhs.id;
   }
-  if (!CompareLineString3d(lhs.right, rhs.right, tolerance)) {
+  if (!maliput_sparse::test::CompareLineString3d(lhs.right, rhs.right, tolerance)) {
     return ::testing::AssertionFailure() << "Lane right boundaries do not match: " << lhs.id;
   }
   if (lhs.left_lane_id != rhs.left_lane_id) {
