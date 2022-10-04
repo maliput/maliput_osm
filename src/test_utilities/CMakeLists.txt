@@ -3,6 +3,7 @@
 ##############################################################################
 add_library(test_utilities
   osm_types_compare.cc
+  builder_configuration_for_osm.cc
 )
 add_library(maliput_osm::test_utilities ALIAS test_utilities)
 set_target_properties(test_utilities
