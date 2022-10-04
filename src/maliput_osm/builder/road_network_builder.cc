@@ -62,6 +62,8 @@ std::unique_ptr<maliput::api::RoadNetwork> RoadNetworkBuilder::operator()() cons
   maliput::log()->trace("Building RoadGeometry...");
   std::unique_ptr<const maliput::api::RoadGeometry> rg = RoadGeometryBuilder(std::move(osm_manager), builder_config)();
 
+  // TODO(https://github.com/maliput/maliput_osm/issues/12): Populate the books.
+
   maliput::log()->trace("Building TrafficLightBook...");
   auto traffic_light_book = std::make_unique<maliput::TrafficLightBook>();
   maliput::log()->trace("Built TrafficLightBook.");

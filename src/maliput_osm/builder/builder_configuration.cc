@@ -74,5 +74,17 @@ BuilderConfiguration BuilderConfiguration::FromMap(const std::map<std::string, s
   return builder_config;
 }
 
+std::map<std::string, std::string> BuilderConfiguration::ToStringMap() const {
+  std::map<std::string, std::string> config;
+  config.emplace(config::kRoadGeometryId, road_geometry_id.string());
+  config.emplace(config::kOsmFile, osm_file);
+  config.emplace(config::kOrigin, origin.to_str());
+  config.emplace(config::kLinearTolerance, std::to_string(linear_tolerance));
+  config.emplace(config::kAngularTolerance, std::to_string(angular_tolerance));
+  config.emplace(config::kScaleLength, std::to_string(scale_length));
+  config.emplace(config::kInertialToBackendFrameTranslation, inertial_to_backend_frame_translation.to_str());
+  return config;
+}
+
 }  // namespace builder
 }  // namespace maliput_osm
