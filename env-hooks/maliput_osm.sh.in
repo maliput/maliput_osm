@@ -1,0 +1,1 @@
+ament_prepend_unique_value MALIPUT_OSM_RESOURCE_ROOT "$AMENT_CURRENT_PREFIX/share/@PROJECT_NAME@"

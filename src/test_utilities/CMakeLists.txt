@@ -1,35 +1,38 @@
 ##############################################################################
 # osm
 ##############################################################################
-add_library(osm
-  osm_manager.cc
-  conversions.cc
+
+if(BUILD_TESTING)
+
+add_library(test_utilities
+  osm_types_compare.cc
 )
-add_library(maliput_osm::osm ALIAS osm)
-set_target_properties(osm
+add_library(maliput_osm::test_utilities ALIAS test_utilities)
+set_target_properties(test_utilities
   PROPERTIES
-    OUTPUT_NAME maliput_osm_osm
+    OUTPUT_NAME maliput_osm_test_utilities
 )
 
 target_include_directories(
-  osm
+  test_utilities
   PUBLIC
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_link_libraries(osm
+target_link_libraries(test_utilities
    PRIVATE
-    lanelet2_core::lanelet2_core
-    lanelet2_io::lanelet2_io
-    maliput::api
-    maliput::common
+    maliput::test_utilities
+    maliput_osm::osm
     maliput_sparse::geometry
+    maliput_sparse::test_utilities
 )
 
-install(TARGETS osm
+install(TARGETS test_utilities
   EXPORT ${PROJECT_NAME}-targets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
+
+endif()

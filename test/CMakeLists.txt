@@ -13,8 +13,13 @@ if (TARGET ${target})
       )
 
       target_link_libraries(${target}
+        lanelet2_io::lanelet2_io
         maliput::api
         maliput::common
+        maliput::test_utilities
+        maliput_osm::osm
+        maliput_osm::utilities
+        maliput_osm::test_utilities
         maliput_sparse::geometry
       )
 
