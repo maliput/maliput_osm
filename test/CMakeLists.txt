@@ -17,13 +17,16 @@ if (TARGET ${target})
         maliput::api
         maliput::common
         maliput::test_utilities
+        maliput_osm::builder
         maliput_osm::osm
         maliput_osm::utilities
         maliput_osm::test_utilities
+        maliput_sparse::builder
         maliput_sparse::geometry
       )
 
     endif()
 endmacro()
 
+add_subdirectory(builder)
 add_subdirectory(osm)

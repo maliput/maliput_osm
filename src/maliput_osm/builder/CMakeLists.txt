@@ -1,39 +1,39 @@
 ##############################################################################
 # osm
 ##############################################################################
-if(BUILD_TESTING)
-
-add_library(test_utilities
-  osm_types_compare.cc
-  builder_configuration_for_osm.cc
+add_library(builder
+  builder_configuration.cc
+  road_geometry_builder.cc
 )
 
-add_library(maliput_osm::test_utilities ALIAS test_utilities)
-set_target_properties(test_utilities
+add_library(maliput_osm::builder ALIAS builder)
+set_target_properties(builder
   PROPERTIES
-    OUTPUT_NAME maliput_osm_test_utilities
+    OUTPUT_NAME maliput_osm_builder
 )
 
 target_include_directories(
-  test_utilities
+  builder
   PUBLIC
+    $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_link_libraries(test_utilities
-   PRIVATE
-    maliput::test_utilities
-    maliput_osm::osm
+target_link_libraries(builder
+   PUBLIC
+    maliput::api
+    maliput::base
+    maliput::geometry_base
+    maliput_sparse::builder
     maliput_sparse::geometry
-    maliput_sparse::test_utilities
+  PRIVATE
+    maliput_osm::osm
 )
 
-install(TARGETS test_utilities
+install(TARGETS builder
   EXPORT ${PROJECT_NAME}-targets
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
-
-endif()

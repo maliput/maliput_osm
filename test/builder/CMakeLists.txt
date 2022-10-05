@@ -1,0 +1,3 @@
+ament_add_gtest(road_geometry_builder_test road_geometry_builder_test.cc)
+
+add_dependencies_to_test(road_geometry_builder_test)
