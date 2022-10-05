@@ -1,10 +1,13 @@
 ##############################################################################
 # osm
 ##############################################################################
+if(BUILD_TESTING)
+
 add_library(test_utilities
   osm_types_compare.cc
   builder_configuration_for_osm.cc
 )
+
 add_library(maliput_osm::test_utilities ALIAS test_utilities)
 set_target_properties(test_utilities
   PROPERTIES
@@ -23,6 +26,7 @@ target_link_libraries(test_utilities
     maliput::test_utilities
     maliput_osm::osm
     maliput_sparse::geometry
+    maliput_sparse::test_utilities
 )
 
 install(TARGETS test_utilities
@@ -31,3 +35,5 @@ install(TARGETS test_utilities
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
 )
+
+endif()

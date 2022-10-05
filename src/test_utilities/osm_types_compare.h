@@ -39,14 +39,6 @@ namespace maliput_osm {
 namespace osm {
 namespace test {
 
-/// Compares two maliput_sparse::geometry::LineString3d objects.
-/// @param lhs The left-hand side of the comparison.
-/// @param rhs The right-hand side of the comparison.
-/// @param tolerance The tolerance to use when comparing floating point values.
-/// @returns A Google Test assertion result.
-::testing::AssertionResult CompareLineString3d(const maliput_sparse::geometry::LineString3d& lhs,
-                                               const maliput_sparse::geometry::LineString3d& rhs, double tolerance);
-
 /// Compares two osm::Lane objects.
 /// @param lhs The left-hand side of the comparison.
 /// @param rhs The right-hand side of the comparison.

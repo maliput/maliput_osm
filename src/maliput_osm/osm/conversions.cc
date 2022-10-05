@@ -29,6 +29,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maliput_osm/osm/conversions.h"
 
+#include <algorithm>
+
 using maliput_sparse::geometry::LineString3d;
 
 namespace maliput_osm {

@@ -54,7 +54,8 @@ TEST(ToMaliput, LineString) {
 TEST(ToMaliput, Lanelet) {
   const std::vector<maliput::math::Vector3> points_left{{1., 1., 1.}, {2., 2., 2.}, {3., 3., 3.}};
   const std::vector<maliput::math::Vector3> points_right{{3., 3., 3.}, {4., 4., 4.}, {5., 5., 5.}};
-  const Lane::Id lane_id{"10"};
+  constexpr int kLaneIdNumber{10};
+  const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
   const Lane lane{lane_id, maliput_sparse::geometry::LineString3d{points_left},
                   maliput_sparse::geometry::LineString3d{points_right}};
 
@@ -66,7 +67,7 @@ TEST(ToMaliput, Lanelet) {
       8, {lanelet::Point3d{5, points_right[0].x(), points_right[0].y(), points_right[0].z()},
           lanelet::Point3d{6, points_right[1].x(), points_right[1].y(), points_right[1].z()},
           lanelet::Point3d{7, points_right[2].x(), points_right[2].y(), points_right[2].z()}});
-  const lanelet::Lanelet lanelet(std::stoi(lane_id), lanelet_left, lanelet_right);
+  const lanelet::Lanelet lanelet(kLaneIdNumber, lanelet_left, lanelet_right);
 
   EXPECT_EQ(lane, ToMaliput(lanelet));
 }
