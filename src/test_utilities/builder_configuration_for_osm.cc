@@ -42,7 +42,7 @@ namespace test {
 std::optional<builder::BuilderConfiguration> GetBuilderConfigurationFor(const std::string& osm_file_name) {
   const static maliput::math::Vector3 kZeroVector{0., 0., 0.};
 
-  const static std::unordered_map<std::string, builder::BuilderConfiguration> kXodrConfigurations{
+  const static std::unordered_map<std::string, builder::BuilderConfiguration> kOSMConfigurations{
       {"straight_forward.osm",
        builder::BuilderConfiguration{
            maliput::api::RoadGeometryId{"straight_forward"},
@@ -56,8 +56,8 @@ std::optional<builder::BuilderConfiguration> GetBuilderConfigurationFor(const st
 
   };
 
-  return kXodrConfigurations.find(osm_file_name) != kXodrConfigurations.end()
-             ? std::make_optional<builder::BuilderConfiguration>(kXodrConfigurations.at(osm_file_name))
+  return kOSMConfigurations.find(osm_file_name) != kOSMConfigurations.end()
+             ? std::make_optional<builder::BuilderConfiguration>(kOSMConfigurations.at(osm_file_name))
              : std::nullopt;
 }
 

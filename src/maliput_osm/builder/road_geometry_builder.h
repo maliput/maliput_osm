@@ -37,15 +37,20 @@
 namespace maliput_osm {
 namespace builder {
 
+/// Functor for creating a RoadGeometry based on a lanelet2-osm description.
 class RoadGeometryBuilder {
  public:
+  /// Constructs a RoadGeometryBuilder.
+  /// @param osm_manager The OSMManager to use for building the RoadGeometry.
+  /// @param builder_configuration The configuration of the builder.
   RoadGeometryBuilder(std::unique_ptr<osm::OSMManager> osm_manager, const BuilderConfiguration& builder_configuration);
 
+  /// Builds a RoadGeometry.
   std::unique_ptr<const maliput::api::RoadGeometry> operator()();
 
  private:
-  std::unique_ptr<osm::OSMManager> osm_manager_;
-  BuilderConfiguration builder_configuration_;
+  const std::unique_ptr<osm::OSMManager> osm_manager_;
+  const BuilderConfiguration builder_configuration_;
 };
 
 }  // namespace builder

@@ -33,20 +33,6 @@
 
 namespace maliput_osm {
 namespace builder {
-namespace {
-
-template <typename T>
-class UniqueId {
- public:
-  maliput::api::TypeSpecificIdentifier<T> GetId() {
-    return maliput::api::TypeSpecificIdentifier<T>(std::to_string(++id_));
-  }
-
- private:
-  unsigned int id_{};
-};
-
-}  // namespace
 
 RoadGeometryBuilder::RoadGeometryBuilder(std::unique_ptr<osm::OSMManager> osm_manager,
                                          const BuilderConfiguration& builder_configuration)
@@ -64,15 +50,14 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
       .ScaleLength(builder_configuration_.scale_length)
       .InertialToBackendFrameTranslation(builder_configuration_.inertial_to_backend_frame_translation);
 
-  UniqueId<maliput::api::Junction> junction_unique_id{};
   for (const auto& osm_segment : osm_segments) {
-    maliput_sparse::builder::JunctionBuilder junction = rg_builder.StartJunction();
-    junction.Id(junction_unique_id.GetId());
-    maliput_sparse::builder::SegmentBuilder segment = junction.StartSegment();
-    segment.Id(maliput::api::SegmentId{osm_segment.first});
+    maliput_sparse::builder::JunctionBuilder junction_builder = rg_builder.StartJunction();
+    junction_builder.Id(maliput::api::JunctionId{osm_segment.first});
+    maliput_sparse::builder::SegmentBuilder segment_builder = junction_builder.StartSegment();
+    segment_builder.Id(maliput::api::SegmentId{osm_segment.first});
 
     for (const osm::Lane& osm_lane : osm_segment.second.lanes) {
-      segment.StartLane()
+      segment_builder.StartLane()
           .Id(maliput::api::LaneId{osm_lane.id})
           .HeightBounds(maliput::api::HBounds{0., 5.})
           .StartLaneGeometry()
@@ -81,8 +66,9 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
           .EndLaneGeometry()
           .EndLane();
     }
-    segment.EndSegment().EndJunction();
+    segment_builder.EndSegment().EndJunction();
   }
+  // TODO(#18): Build branchpoints.
   return rg_builder.Build();
 }
 
