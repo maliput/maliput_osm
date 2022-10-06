@@ -1,0 +1,3 @@
+ament_add_gtest(road_network_plugin_test road_network_plugin_test.cc)
+
+add_dependencies_to_test(road_network_plugin_test)

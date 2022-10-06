@@ -1,1 +1,2 @@
 ament_prepend_unique_value MALIPUT_OSM_RESOURCE_ROOT "$AMENT_CURRENT_PREFIX/share/@PROJECT_NAME@"
+ament_prepend_unique_value MALIPUT_PLUGIN_PATH "$AMENT_CURRENT_PREFIX/lib/maliput_plugins"

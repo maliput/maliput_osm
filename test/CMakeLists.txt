@@ -16,6 +16,7 @@ if (TARGET ${target})
         lanelet2_io::lanelet2_io
         maliput::api
         maliput::common
+        maliput::plugin
         maliput::test_utilities
         maliput_osm::builder
         maliput_osm::osm
@@ -30,3 +31,4 @@ endmacro()
 
 add_subdirectory(builder)
 add_subdirectory(osm)
+add_subdirectory(plugin)

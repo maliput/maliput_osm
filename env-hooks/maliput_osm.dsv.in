@@ -1,1 +1,2 @@
 prepend-non-duplicate;MALIPUT_OSM_RESOURCE_ROOT;share/@PROJECT_NAME@
+prepend-non-duplicate;MALIPUT_PLUGIN_PATH;lib/maliput_plugins
