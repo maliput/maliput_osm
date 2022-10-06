@@ -40,6 +40,10 @@ struct BuilderConfiguration {
   /// Create a BuilderConfiguration from a string dictionary.
   static BuilderConfiguration FromMap(const std::map<std::string, std::string>& config);
 
+  /// @details The keys of the map are listed at @ref builder_configuration_keys.
+  /// @returns A string-string map containing the builder configuration.
+  std::map<std::string, std::string> ToStringMap() const;
+
   /// Id of the road geometry.
   maliput::api::RoadGeometryId road_geometry_id{"maliput_osm"};
   /// Path to the OSM file.

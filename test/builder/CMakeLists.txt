@@ -1,3 +1,5 @@
 ament_add_gtest(road_geometry_builder_test road_geometry_builder_test.cc)
+ament_add_gtest(road_network_builder_test road_network_builder_test.cc)
 
 add_dependencies_to_test(road_geometry_builder_test)
+add_dependencies_to_test(road_network_builder_test)
