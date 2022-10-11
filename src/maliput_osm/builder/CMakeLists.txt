@@ -22,13 +22,13 @@ target_include_directories(
 )
 
 target_link_libraries(builder
-   PUBLIC
+  PUBLIC
     maliput::api
     maliput::base
     maliput::geometry_base
+  PRIVATE
     maliput_sparse::builder
     maliput_sparse::geometry
-  PRIVATE
     maliput_osm::osm
 )
 
