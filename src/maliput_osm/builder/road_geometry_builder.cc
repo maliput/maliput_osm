@@ -69,7 +69,7 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
     segment_builder.EndSegment().EndJunction();
   }
   // TODO(#18): Build branchpoints.
-  return rg_builder.Build();
+  return rg_builder.StartBranchPoints().EndBranchPoints().Build();
 }
 
 }  // namespace builder
