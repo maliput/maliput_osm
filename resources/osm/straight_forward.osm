@@ -1,8 +1,8 @@
+<?xml version="1.0"?>
 <!--
 A straight 2-lane Road with North orientation.
 Origin: (0, 0)
 -->
-<?xml version="1.0"?>
 <osm version="0.6" generator="lanelet2">
   <node id="1000" visible="true" version="1" lat="-0.00449157642" lon="-0.00003144103" />
   <node id="1001" visible="true" version="1" lat="0.00449157642" lon="-0.00003144103" />
