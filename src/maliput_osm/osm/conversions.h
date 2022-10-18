@@ -29,6 +29,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #pragma once
 
+#include <lanelet2_core/LaneletMap.h>
 #include <lanelet2_core/primitives/Lanelet.h>
 #include <maliput_sparse/geometry/line_string.h>
 
@@ -45,11 +46,11 @@ maliput_sparse::geometry::LineString3d ToMaliput(const lanelet::ConstLineString3
 /// Converts a lanelet::Lanelet to a maliput_osm::osm::Lane.
 ///
 /// maliput_osm::osm::Lane is an struct with several fields.
-/// This method only populates the id, left and right fields.
 ///
 /// @param lanelet The lanelet::Lanelet to convert.
+/// @param map_layer lanelet::LaneletLayer for finding adjacent lanelets.
 /// @returns The converted maliput_osm::osm::Lane.
-Lane ToMaliput(const lanelet::Lanelet& lanelet);
+Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletLayer& map_layer);
 
 }  // namespace osm
 }  // namespace maliput_osm

@@ -47,7 +47,7 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
                        osm_file_path);
 
   for (const auto& lanelet : map->laneletLayer) {
-    const Lane lane{ToMaliput(lanelet)};
+    const Lane lane = ToMaliput(lanelet, map->laneletLayer);
     const Segment::Id segment_id{"segment_" + std::to_string(lanelet.id())};
     segments_.emplace(segment_id, Segment{segment_id, {lane}});
   }
