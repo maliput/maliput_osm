@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<!--
+A straight 6-lane-100m Road with East orientation.
+Origin: (0, 0)
+-->
+<osm version="0.6" generator="lanelet2">
+  <node id="1000" visible="true" version="1" lat="0.0000943231" lon="0" />
+  <node id="1001" visible="true" version="1" lat="0.0000943231" lon="0.00089831528" />
+  <node id="1003" visible="true" version="1" lat="0.00006288207" lon="0" />
+  <node id="1004" visible="true" version="1" lat="0.00006288207" lon="0.00089831528" />
+  <node id="1007" visible="true" version="1" lat="0.00003144103" lon="0" />
+  <node id="1008" visible="true" version="1" lat="0.00003144103" lon="0.00089831528" />
+  <node id="1011" visible="true" version="1" lat="0" lon="0" />
+  <node id="1012" visible="true" version="1" lat="0" lon="0.00089831528" />
+  <node id="1015" visible="true" version="1" lat="-0.00003144103" lon="0" />
+  <node id="1016" visible="true" version="1" lat="-0.00003144103" lon="0.00089831528" />
+  <node id="1019" visible="true" version="1" lat="-0.00006288207" lon="0" />
+  <node id="1020" visible="true" version="1" lat="-0.00006288207" lon="0.00089831528" />
+  <node id="1023" visible="true" version="1" lat="-0.0000943231" lon="0" />
+  <node id="1024" visible="true" version="1" lat="-0.0000943231" lon="0.00089831528" />
+  <way id="1002" visible="true" version="1">
+    <nd ref="1000" />
+    <nd ref="1001" />
+  </way>
+  <way id="1005" visible="true" version="1">
+    <nd ref="1003" />
+    <nd ref="1004" />
+  </way>
+  <way id="1009" visible="true" version="1">
+    <nd ref="1007" />
+    <nd ref="1008" />
+  </way>
+  <way id="1013" visible="true" version="1">
+    <nd ref="1011" />
+    <nd ref="1012" />
+  </way>
+  <way id="1017" visible="true" version="1">
+    <nd ref="1015" />
+    <nd ref="1016" />
+  </way>
+  <way id="1021" visible="true" version="1">
+    <nd ref="1019" />
+    <nd ref="1020" />
+  </way>
+  <way id="1025" visible="true" version="1">
+    <nd ref="1023" />
+    <nd ref="1024" />
+  </way>
+  <relation id="1006" visible="true" version="1">
+    <member type="way" ref="1002" role="left" />
+    <member type="way" ref="1005" role="right" />
+    <tag k="type" v="lanelet" />
+  </relation>
+  <relation id="1010" visible="true" version="1">
+    <member type="way" ref="1005" role="left" />
+    <member type="way" ref="1009" role="right" />
+    <tag k="type" v="lanelet" />
+  </relation>
+  <relation id="1014" visible="true" version="1">
+    <member type="way" ref="1009" role="left" />
+    <member type="way" ref="1013" role="right" />
+    <tag k="type" v="lanelet" />
+  </relation>
+  <relation id="1018" visible="true" version="1">
+    <member type="way" ref="1013" role="left" />
+    <member type="way" ref="1017" role="right" />
+    <tag k="type" v="lanelet" />
+  </relation>
+  <relation id="1022" visible="true" version="1">
+    <member type="way" ref="1017" role="left" />
+    <member type="way" ref="1021" role="right" />
+    <tag k="type" v="lanelet" />
+  </relation>
+  <relation id="1026" visible="true" version="1">
+    <member type="way" ref="1021" role="left" />
+    <member type="way" ref="1025" role="right" />
+    <tag k="type" v="lanelet" />
+  </relation>
+</osm>
