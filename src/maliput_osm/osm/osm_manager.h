@@ -35,7 +35,9 @@
 
 #include <maliput/common/maliput_copyable.h>
 
+#include "maliput_osm/osm/lane.h"
 #include "maliput_osm/osm/segment.h"
+#include "utilities/id_gen.h"
 
 namespace maliput_osm {
 namespace osm {
@@ -63,6 +65,36 @@ class OSMManager {
   const std::unordered_map<Segment::Id, Segment>& GetOSMSegments() const;
 
  private:
+  // Convenient definitions for the AddLanesToSegment method's left parameter.
+  // @{
+  static constexpr bool kAdjacentLeft{true};
+  static constexpr bool kAdjacentRight{!kAdjacentLeft};
+  // @}
+
+  // Recurrent method for finding the left or right adjacent lanes of a given @p lane_id and populate the @p segment.
+  //
+  // @param lane_id The lane_id to find the adjacent lanes of.
+  // @param lanes The lanes to search in.
+  // @param left Whether to search for the left or right adjacent lanes.
+  // @param[out] segment The segment to be filled. The lanes vector is filled from rightest most lane to leftest most
+  // lane.
+  //
+  // @throws maliput::common::assertion_error When the adjacent lane id doesn't match any lane in the @p lanes.
+  static void AddLanesToSegment(const Lane::Id& lane_id, const std::unordered_map<Lane::Id, Lane>& lanes, bool left,
+                                Segment& segment);
+
+  // Creates the complete Segment for a given @p lane .
+  // The graph is traversed using the lane.left_lane_id and lane.right_lane_id in order to complete the Segment.
+  // When a lane already belongs to a segment then no segment is created and std::nullopt is returned.
+  // @param lane The lane to create a Segment from.
+  // @param lanes The map of all lanes.
+  // @returns A populated Segment or std::nullopt when the lane already belongs to a segment.
+  std::optional<Segment> CreateSegmentForLane(const Lane& lane, const std::unordered_map<Lane::Id, Lane>& lanes) const;
+
+  // Id generator for the segments.
+  mutable utilities::IdGen<Segment::Id> segment_id_gen_;
+
+  // Collection of segments.
   std::unordered_map<Segment::Id, Segment> segments_{};
 };
 

@@ -86,8 +86,14 @@ std::vector<RoadGeometryBuilderTestParameters> InstantiateBuilderParameters() {
       {"straight_forward.osm",
        "straight_forward",
        {
-           {JunctionId("segment_1006"), {{{SegmentId("segment_1006")}, {LaneId("1006")}}}},
-           {JunctionId("segment_1010"), {{{SegmentId("segment_1010")}, {LaneId("1010")}}}},
+           {JunctionId("0"), {{{SegmentId("0")}, {LaneId("1006"), LaneId("1010")}}}},
+       }},
+      {"multi_lanes_road.osm",
+       "multi_lanes_road",
+       {
+           {JunctionId("0"),
+            {{{SegmentId("0")},
+              {LaneId("1026"), LaneId("1022"), LaneId("1018"), LaneId("1014"), LaneId("1010"), LaneId("1006")}}}},
        }},
   };
 }

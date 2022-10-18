@@ -37,25 +37,70 @@
 
 namespace maliput_osm {
 namespace osm {
+namespace {}  // namespace
 
 OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& config) {
   using namespace lanelet;
   const LaneletMapPtr map = load(osm_file_path, Origin{GPSPoint{config.origin.x(), config.origin.y()}});
 
-  // TODO(#6): Support multiple lanes per segment. Organize adjacent lanes within segments.
-  maliput::log()->warn("Each lane from {} populates only one segment. Lanes are not organized within segments yet.",
-                       osm_file_path);
-
+  // Obtain lanelet lanes.
+  std::unordered_map<Lane::Id, Lane> lanes;
   for (const auto& lanelet : map->laneletLayer) {
     const Lane lane = ToMaliput(lanelet, map->laneletLayer);
-    const Segment::Id segment_id{"segment_" + std::to_string(lanelet.id())};
-    segments_.emplace(segment_id, Segment{segment_id, {lane}});
+    lanes.emplace(lane.id, lane);
+  }
+
+  // Fill up segment according their adjacency.
+  for (const auto& lane : lanes) {
+    const std::optional<Segment> segment = CreateSegmentForLane(lane.second, lanes);
+    if (!segment.has_value()) {
+      continue;
+    }
+    segments_.emplace(segment->id, std::move(segment.value()));
   }
 }
 
 OSMManager::~OSMManager() = default;
 
 const std::unordered_map<Segment::Id, Segment>& OSMManager::GetOSMSegments() const { return segments_; }
+
+std::optional<Segment> OSMManager::CreateSegmentForLane(const Lane& lane,
+                                                        const std::unordered_map<Lane::Id, Lane>& lanes) const {
+  // If segment for this lane is already added then return.
+  if (std::find_if(segments_.begin(), segments_.end(), [&lane](const auto& segment) {
+        return std::find_if(segment.second.lanes.begin(), segment.second.lanes.end(),
+                            [&lane_id = lane.id](const auto& seg_lane) { return seg_lane.id == lane_id; }) !=
+               segment.second.lanes.end();
+      }) != segments_.end()) {
+    return std::nullopt;
+  }
+
+  // Create and populate segment for this lane.
+  Segment segment;
+  segment.id = segment_id_gen_();
+  segment.lanes.emplace_back(lane);
+
+  if (lane.left_lane_id.has_value()) {
+    AddLanesToSegment(lane.left_lane_id.value(), lanes, kAdjacentLeft, segment);
+  }
+  if (lane.right_lane_id.has_value()) {
+    AddLanesToSegment(lane.right_lane_id.value(), lanes, kAdjacentRight, segment);
+  }
+  return {segment};
+}
+
+void OSMManager::AddLanesToSegment(const Lane::Id& lane_id, const std::unordered_map<Lane::Id, Lane>& lanes, bool left,
+                                   Segment& segment) {
+  const auto lane = lanes.find(lane_id);
+  MALIPUT_THROW_UNLESS(lane != lanes.end());
+  // Add lane to segment.
+  segment.lanes.insert(left ? segment.lanes.end() : segment.lanes.begin(), lane->second);
+  // Check the following adjacent lane.
+  const auto next_adjacent_lane = left ? lane->second.left_lane_id : lane->second.right_lane_id;
+  if (next_adjacent_lane.has_value()) {
+    AddLanesToSegment(next_adjacent_lane.value(), lanes, left, segment);
+  }
+}
 
 }  // namespace osm
 }  // namespace maliput_osm
