@@ -66,7 +66,7 @@ Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletLayer& map
   };
   // Get left lane id.
   const std::optional<std::string> left_lane_id = find_usage_of_lane_bounds(lanelet.leftBound());
-  // Get left right id.
+  // Get right lane id.
   const std::optional<std::string> right_lane_id = find_usage_of_lane_bounds(lanelet.rightBound());
 
   // TODO(#26): Find the successor and predecessor lanelets.
