@@ -30,6 +30,8 @@
 #include "maliput_osm/osm/conversions.h"
 
 #include <algorithm>
+#include <optional>
+#include <string>
 
 using maliput_sparse::geometry::LineString3d;
 
@@ -43,8 +45,32 @@ LineString3d ToMaliput(const lanelet::ConstLineString3d& line_string) {
   return LineString3d{points};
 }
 
-Lane ToMaliput(const lanelet::Lanelet& lanelet) {
-  return {std::to_string(lanelet.id()), ToMaliput(lanelet.leftBound()), ToMaliput(lanelet.rightBound())};
+Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletLayer& map_layer) {
+  // Get Id.
+  const std::string id = std::to_string(lanelet.id());
+  // Get left boundary.
+  const LineString3d left_bound = ToMaliput(lanelet.leftBound());
+  // Get right boundary.
+  const LineString3d right_bound = ToMaliput(lanelet.rightBound());
+
+  // Obtains the lanelets that uses same @p bound linestring.
+  auto find_usage_of_lane_bounds = [&lanelet, &map_layer](const lanelet::ConstLineString3d& bound) {
+    const auto lanelets = map_layer.findUsages(bound);
+    MALIPUT_THROW_UNLESS(lanelets.size() >= 1);
+    MALIPUT_THROW_UNLESS(lanelets.size() <= 2);
+    const auto lanelet_it = std::find_if(lanelets.begin(), lanelets.end(), [&lanelet](const auto& lanelet_usage) {
+      return lanelet_usage.id() != lanelet.id();
+    });
+    return lanelet_it != lanelets.end() ? std::make_optional<std::string>(std::to_string(lanelet_it->id()))
+                                        : std::nullopt;
+  };
+  // Get left lane id.
+  const std::optional<std::string> left_lane_id = find_usage_of_lane_bounds(lanelet.leftBound());
+  // Get right lane id.
+  const std::optional<std::string> right_lane_id = find_usage_of_lane_bounds(lanelet.rightBound());
+
+  // TODO(#26): Find the successor and predecessor lanelets.
+  return {id, left_bound, right_bound, left_lane_id, right_lane_id, {} /* successors */, {} /* predecessors */};
 }
 
 }  // namespace osm

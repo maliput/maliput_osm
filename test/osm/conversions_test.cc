@@ -32,15 +32,21 @@
 #include <string>
 
 #include <gtest/gtest.h>
+#include <lanelet2_core/LaneletMap.h>
 #include <lanelet2_core/primitives/Lanelet.h>
+#include <lanelet2_io/Io.h>
 #include <maliput_sparse/geometry/line_string.h>
 
 #include "maliput_osm/osm/lane.h"
+#include "test_utilities/osm_types_compare.h"
+#include "utilities/utilities.h"
 
 namespace maliput_osm {
 namespace osm {
 namespace test {
 namespace {
+
+static constexpr double kTolerance{1e-6};
 
 TEST(ToMaliput, LineString) {
   const std::vector<maliput::math::Vector3> expected_points{{1., 1., 1.}, {2., 2., 2.}, {3., 3., 3.}};
@@ -56,8 +62,13 @@ TEST(ToMaliput, Lanelet) {
   const std::vector<maliput::math::Vector3> points_right{{3., 3., 3.}, {4., 4., 4.}, {5., 5., 5.}};
   constexpr int kLaneIdNumber{10};
   const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
-  const Lane lane{lane_id, maliput_sparse::geometry::LineString3d{points_left},
-                  maliput_sparse::geometry::LineString3d{points_right}};
+  const Lane lane{lane_id,
+                  maliput_sparse::geometry::LineString3d{points_left},
+                  maliput_sparse::geometry::LineString3d{points_right},
+                  {} /* no left lane */,
+                  {} /* no right lane */,
+                  {} /* no successor */,
+                  {} /* no predecessor */};
 
   const lanelet::LineString3d lanelet_left(
       4, {lanelet::Point3d{1, points_left[0].x(), points_left[0].y(), points_left[0].z()},
@@ -68,8 +79,83 @@ TEST(ToMaliput, Lanelet) {
           lanelet::Point3d{6, points_right[1].x(), points_right[1].y(), points_right[1].z()},
           lanelet::Point3d{7, points_right[2].x(), points_right[2].y(), points_right[2].z()}});
   const lanelet::Lanelet lanelet(kLaneIdNumber, lanelet_left, lanelet_right);
+  const auto lanelet_map = lanelet::utils::createMap({lanelet}, {});
 
-  EXPECT_EQ(lane, ToMaliput(lanelet));
+  EXPECT_TRUE(test::CompareOSMLane(lane, ToMaliput(lanelet, lanelet_map->laneletLayer), kTolerance));
+}
+
+// Tests ToMaliput conversion using multi_lanes_road.osm map file.
+class MultiLanesRoadMapToMaliputTest : public testing::Test {
+ public:
+  const std::string kOSMFilePath = utilities::FindOSMResource("multi_lanes_road.osm");
+  const lanelet::LaneletMapPtr lanelet_map_ = lanelet::load(kOSMFilePath, lanelet::Origin{lanelet::GPSPoint{0., 0.}});
+};
+
+TEST_F(MultiLanesRoadMapToMaliputTest, LeftLane) {
+  constexpr int kLaneIdNumber{1006};
+  constexpr int kRightLaneIdNumber{1010};
+  const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
+  const std::vector<maliput::math::Vector3> points_left{{0., 10.5, 0.}, {100., 10.5, 0.}};
+  const std::vector<maliput::math::Vector3> points_right{{0., 7., 0.}, {100., 7., 0.}};
+  const std::optional<Lane::Id> left_lane_id{std::nullopt};
+  const std::optional<Lane::Id> right_lane_id{std::to_string(kRightLaneIdNumber)};
+
+  const Lane expected_lane{lane_id,
+                           maliput_sparse::geometry::LineString3d{points_left},
+                           maliput_sparse::geometry::LineString3d{points_right},
+                           left_lane_id,
+                           right_lane_id,
+                           {} /* no successor */,
+                           {} /* no predecessor */};
+
+  const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
+  ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
+  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_->laneletLayer), kTolerance));
+}
+
+TEST_F(MultiLanesRoadMapToMaliputTest, RightLane) {
+  constexpr int kLaneIdNumber{1026};
+  constexpr int kLeftLaneIdNumber{1022};
+  const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
+  const std::vector<maliput::math::Vector3> points_left{{0., -7., 0.}, {100., -7., 0.}};
+  const std::vector<maliput::math::Vector3> points_right{{0., -10.5, 0.}, {100., -10.5, 0.}};
+  const std::optional<Lane::Id> left_lane_id{std::to_string(kLeftLaneIdNumber)};
+  const std::optional<Lane::Id> right_lane_id{std::nullopt};
+
+  const Lane expected_lane{lane_id,
+                           maliput_sparse::geometry::LineString3d{points_left},
+                           maliput_sparse::geometry::LineString3d{points_right},
+                           left_lane_id,
+                           right_lane_id,
+                           {} /* no successor */,
+                           {} /* no predecessor */};
+
+  const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
+  ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
+  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_->laneletLayer), kTolerance));
+}
+
+TEST_F(MultiLanesRoadMapToMaliputTest, CenterLane) {
+  constexpr int kLaneIdNumber{1014};
+  constexpr int kLeftLaneIdNumber{1010};
+  constexpr int kRightLaneIdNumber{1018};
+  const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
+  const std::vector<maliput::math::Vector3> points_left{{0., 3.5, 0.}, {100., 3.5, 0.}};
+  const std::vector<maliput::math::Vector3> points_right{{0., 0., 0.}, {100., 0., 0.}};
+  const std::optional<Lane::Id> left_lane_id{std::to_string(kLeftLaneIdNumber)};
+  const std::optional<Lane::Id> right_lane_id{std::to_string(kRightLaneIdNumber)};
+
+  const Lane expected_lane{lane_id,
+                           maliput_sparse::geometry::LineString3d{points_left},
+                           maliput_sparse::geometry::LineString3d{points_right},
+                           left_lane_id,
+                           right_lane_id,
+                           {} /* no successor */,
+                           {} /* no predecessor */};
+
+  const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
+  ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
+  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_->laneletLayer), kTolerance));
 }
 
 }  // namespace
