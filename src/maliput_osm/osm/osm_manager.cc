@@ -65,7 +65,7 @@ OSMManager::~OSMManager() = default;
 const std::unordered_map<Segment::Id, Segment>& OSMManager::GetOSMSegments() const { return segments_; }
 
 std::optional<Segment> OSMManager::CreateSegmentForLane(const Lane& lane,
-                                                        const std::unordered_map<Lane::Id, Lane>& lanes) const {
+                                                        const std::unordered_map<Lane::Id, Lane>& lanes) {
   // If segment for this lane is already added then return.
   if (std::find_if(segments_.begin(), segments_.end(), [&lane](const auto& segment) {
         return std::find_if(segment.second.lanes.begin(), segment.second.lanes.end(),

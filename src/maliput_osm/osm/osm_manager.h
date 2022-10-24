@@ -89,10 +89,10 @@ class OSMManager {
   // @param lane The lane to create a Segment from.
   // @param lanes The map of all lanes.
   // @returns A populated Segment or std::nullopt when the lane already belongs to a segment.
-  std::optional<Segment> CreateSegmentForLane(const Lane& lane, const std::unordered_map<Lane::Id, Lane>& lanes) const;
+  std::optional<Segment> CreateSegmentForLane(const Lane& lane, const std::unordered_map<Lane::Id, Lane>& lanes);
 
   // Id generator for the segments.
-  mutable utilities::IdGen<Segment::Id> segment_id_gen_;
+  utilities::IdGen<Segment::Id> segment_id_gen_;
 
   // Collection of segments.
   std::unordered_map<Segment::Id, Segment> segments_{};
