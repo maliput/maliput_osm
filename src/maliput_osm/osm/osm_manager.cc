@@ -37,7 +37,6 @@
 
 namespace maliput_osm {
 namespace osm {
-namespace {}  // namespace
 
 OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& config) {
   using namespace lanelet;
@@ -96,9 +95,9 @@ void OSMManager::AddLanesToSegment(const Lane::Id& lane_id, const std::unordered
   // Add lane to segment.
   segment->lanes.insert(left ? segment->lanes.end() : segment->lanes.begin(), lane->second);
   // Check the following adjacent lane.
-  const auto next_adjacent_lane = left ? lane->second.left_lane_id : lane->second.right_lane_id;
-  if (next_adjacent_lane.has_value()) {
-    AddLanesToSegment(next_adjacent_lane.value(), lanes, left, segment);
+  const std::optional<Lane::Id>& next_adjacent_lane_id = left ? lane->second.left_lane_id : lane->second.right_lane_id;
+  if (next_adjacent_lane_id.has_value()) {
+    AddLanesToSegment(next_adjacent_lane_id.value(), lanes, left, segment);
   }
 }
 
