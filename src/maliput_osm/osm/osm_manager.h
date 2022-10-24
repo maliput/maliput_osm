@@ -81,7 +81,7 @@ class OSMManager {
   //
   // @throws maliput::common::assertion_error When the adjacent lane id doesn't match any lane in the @p lanes.
   static void AddLanesToSegment(const Lane::Id& lane_id, const std::unordered_map<Lane::Id, Lane>& lanes, bool left,
-                                Segment& segment);
+                                Segment* segment);
 
   // Creates the complete Segment for a given @p lane .
   // The graph is traversed using the lane.left_lane_id and lane.right_lane_id in order to complete the Segment.

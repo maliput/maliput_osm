@@ -81,20 +81,20 @@ std::optional<Segment> OSMManager::CreateSegmentForLane(const Lane& lane,
   segment.lanes.emplace_back(lane);
 
   if (lane.left_lane_id.has_value()) {
-    AddLanesToSegment(lane.left_lane_id.value(), lanes, kAdjacentLeft, segment);
+    AddLanesToSegment(lane.left_lane_id.value(), lanes, kAdjacentLeft, &segment);
   }
   if (lane.right_lane_id.has_value()) {
-    AddLanesToSegment(lane.right_lane_id.value(), lanes, kAdjacentRight, segment);
+    AddLanesToSegment(lane.right_lane_id.value(), lanes, kAdjacentRight, &segment);
   }
   return {segment};
 }
 
 void OSMManager::AddLanesToSegment(const Lane::Id& lane_id, const std::unordered_map<Lane::Id, Lane>& lanes, bool left,
-                                   Segment& segment) {
+                                   Segment* segment) {
   const auto lane = lanes.find(lane_id);
   MALIPUT_THROW_UNLESS(lane != lanes.end());
   // Add lane to segment.
-  segment.lanes.insert(left ? segment.lanes.end() : segment.lanes.begin(), lane->second);
+  segment->lanes.insert(left ? segment->lanes.end() : segment->lanes.begin(), lane->second);
   // Check the following adjacent lane.
   const auto next_adjacent_lane = left ? lane->second.left_lane_id : lane->second.right_lane_id;
   if (next_adjacent_lane.has_value()) {
