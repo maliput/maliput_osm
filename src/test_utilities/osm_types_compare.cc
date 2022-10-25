@@ -66,11 +66,12 @@ namespace test {
     return ::testing::AssertionFailure() << "Segment ids do not match: " << lhs.id << " != " << rhs.id;
   }
   if (lhs.lanes.size() != rhs.lanes.size()) {
-    return ::testing::AssertionFailure() << "Segment lane size mismatch: " << lhs.id;
+    return ::testing::AssertionFailure() << "Segment lane size mismatch: " << lhs.lanes.size() << " vs "
+                                         << rhs.lanes.size();
   }
   for (size_t i = 0; i < lhs.lanes.size(); ++i) {
     if (!CompareOSMLane(lhs.lanes[i], rhs.lanes[i], tolerance)) {
-      return ::testing::AssertionFailure() << "Segment lane mismatch: " << lhs.id;
+      return ::testing::AssertionFailure() << "Segment lane mismatch: " << lhs.lanes[i].id << " != " << rhs.lanes[i].id;
     }
   }
   return ::testing::AssertionSuccess();

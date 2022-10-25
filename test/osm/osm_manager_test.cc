@@ -56,24 +56,20 @@ struct OSMManagerTestCase {
 std::vector<OSMManagerTestCase> OSMManagerTestCases() {
   return {
       {"straight_forward.osm",
-       {{Segment::Id{"segment_1006"},
-         {Segment::Id{"segment_1006"},
+       {{Segment::Id{"0"},
+         {Segment::Id{"0"},
           {
+              {Lane::Id{"1010"},
+               LineString3d{{0., -500., 0.}, {0., 500., 0.}},
+               LineString3d{{3.5, -500., 0.}, {3.5, 500., 0.}},
+               {std::make_optional<Lane::Id>("1006")},
+               std::nullopt},
               {Lane::Id{"1006"},
                LineString3d{{-3.5, -500., 0.}, {-3.5, 500., 0.}},
                LineString3d{{0., -500., 0.}, {0., 500., 0.}},
                std::nullopt,
                {std::make_optional<Lane::Id>("1010")}},
-          }}},
-        {Segment::Id{"segment_1010"},
-         {
-             Segment::Id{"segment_1010"},
-             {{Lane::Id{"1010"},
-               LineString3d{{0., -500., 0.}, {0., 500., 0.}},
-               LineString3d{{3.5, -500., 0.}, {3.5, 500., 0.}},
-               {std::make_optional<Lane::Id>("1006")},
-               std::nullopt}},
-         }}}},
+          }}}}},
   };
 }
 

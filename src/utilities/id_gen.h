@@ -27,49 +27,23 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#include "test_utilities/builder_configuration_for_osm.h"
+#pragma once
 
-#include <unordered_map>
+#include <string>
 
-#include <maliput/api/road_geometry.h>
-#include <maliput/math/vector.h>
+namespace utilities {
 
-#include "utilities/utilities.h"
+/// Functor for generating unique numerical ids.
+/// @tparam T the type of the id to generate. Its constructor should expect a std::string object.
+template <typename T = std::string>
+class IdGen {
+ public:
+  IdGen() = default;
+  /// @returns a unique numerical id.
+  T operator()() { return T{std::to_string(counter_++)}; }
 
-namespace maliput_osm {
-namespace test {
+ private:
+  std::size_t counter_{0};
+};
 
-std::optional<builder::BuilderConfiguration> GetBuilderConfigurationFor(const std::string& osm_file_name) {
-  const static maliput::math::Vector3 kZeroVector{0., 0., 0.};
-
-  const static std::unordered_map<std::string, builder::BuilderConfiguration> kOsmConfigurations{
-      {"straight_forward.osm",
-       builder::BuilderConfiguration{
-           maliput::api::RoadGeometryId{"straight_forward"},
-           utilities::FindOSMResource("straight_forward.osm"),
-           {0., 0.} /* origin */,
-           5e-2 /* linear_tolerance */,
-           1e-3 /* angular_tolerance */,
-           1. /* scale_length */,
-           kZeroVector,
-       }},
-      {"multi_lanes_road.osm",
-       builder::BuilderConfiguration{
-           maliput::api::RoadGeometryId{"multi_lanes_road"},
-           utilities::FindOSMResource("multi_lanes_road.osm"),
-           {0., 0.} /* origin */,
-           5e-2 /* linear_tolerance */,
-           1e-3 /* angular_tolerance */,
-           1. /* scale_length */,
-           kZeroVector,
-       }},
-
-  };
-
-  return kOsmConfigurations.find(osm_file_name) != kOsmConfigurations.end()
-             ? std::make_optional<builder::BuilderConfiguration>(kOsmConfigurations.at(osm_file_name))
-             : std::nullopt;
-}
-
-}  // namespace test
-}  // namespace maliput_osm
+}  // namespace utilities
