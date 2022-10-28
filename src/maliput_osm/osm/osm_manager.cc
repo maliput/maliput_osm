@@ -45,7 +45,7 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
   // Obtain lanelet lanes.
   std::unordered_map<Lane::Id, Lane> lanes;
   for (const auto& lanelet : map->laneletLayer) {
-    const Lane lane = ToMaliput(lanelet, map->laneletLayer);
+    const Lane lane = ToMaliput(lanelet, map);
     lanes.emplace(lane.id, lane);
   }
 

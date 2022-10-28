@@ -1,3 +1,5 @@
+add_subdirectory(utilities)
+
 ament_add_gtest(lane_test lane_test.cc)
 ament_add_gtest(segment_test segment_test.cc)
 ament_add_gtest(conversions_test conversions_test.cc)

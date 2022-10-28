@@ -6,7 +6,6 @@ if (TARGET ${target})
 
       target_include_directories(${target}
         PRIVATE
-          ${CMAKE_CURRENT_SOURCE_DIR}
           ${PROJECT_SOURCE_DIR}/include
           ${PROJECT_SOURCE_DIR}/src
           ${PROJECT_SOURCE_DIR}/test
@@ -20,6 +19,7 @@ if (TARGET ${target})
         maliput::test_utilities
         maliput_osm::builder
         maliput_osm::osm
+        maliput_osm::osm_utilities
         maliput_osm::utilities
         maliput_osm::test_utilities
         maliput_sparse::builder

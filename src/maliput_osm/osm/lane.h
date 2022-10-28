@@ -33,6 +33,7 @@
 #include <string>
 #include <unordered_set>
 
+#include <maliput/api/lane_data.h>
 #include <maliput_sparse/geometry/line_string.h>
 
 namespace maliput_osm {
@@ -60,9 +61,9 @@ struct Lane {
   /// The id of the lane to the right of this lane.
   std::optional<Id> right_lane_id;
   /// The ids of the lanes that follow this lane.
-  std::unordered_set<Id> successors;
+  std::unordered_map<Id, maliput::api::LaneEnd::Which> successors;
   /// The ids of the lanes that precede this lane.
-  std::unordered_set<Id> predecessors;
+  std::unordered_map<Id, maliput::api::LaneEnd::Which> predecessors;
 };
 
 }  // namespace osm
