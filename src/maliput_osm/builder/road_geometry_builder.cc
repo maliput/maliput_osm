@@ -50,6 +50,7 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
       .ScaleLength(builder_configuration_.scale_length)
       .InertialToBackendFrameTranslation(builder_configuration_.inertial_to_backend_frame_translation);
 
+  maliput_sparse::builder::BranchPointBuilder bp_builder = rg_builder.StartBranchPoints();
   for (const auto& osm_segment : osm_segments) {
     maliput_sparse::builder::JunctionBuilder junction_builder = rg_builder.StartJunction();
     junction_builder.Id(maliput::api::JunctionId{osm_segment.first});
@@ -57,19 +58,26 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
     segment_builder.Id(maliput::api::SegmentId{osm_segment.first});
 
     for (const osm::Lane& osm_lane : osm_segment.second.lanes) {
+      const maliput::api::LaneId lane_id{osm_lane.id};
       segment_builder.StartLane()
-          .Id(maliput::api::LaneId{osm_lane.id})
+          .Id(lane_id)
           .HeightBounds(maliput::api::HBounds{0., 5.})
           .StartLaneGeometry()
           .LeftLineString(osm_lane.left)
           .RightLineString(osm_lane.right)
           .EndLaneGeometry()
           .EndLane();
+      // Connect predecessors.
+      for (const auto& predecessor : osm_lane.predecessors) {
+        const maliput::api::LaneId predecessor_lane_id{predecessor.first};
+        bp_builder.Connect(lane_id, maliput::api::LaneEnd::kStart, predecessor_lane_id, predecessor.second);
+      }
     }
     segment_builder.EndSegment().EndJunction();
   }
-  // TODO(#18): Build branchpoints.
-  return rg_builder.StartBranchPoints().EndBranchPoints().Build();
+  bp_builder.EndBranchPoints();
+
+  return rg_builder.Build();
 }
 
 }  // namespace builder

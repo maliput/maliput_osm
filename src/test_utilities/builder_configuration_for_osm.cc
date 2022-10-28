@@ -63,6 +63,16 @@ std::optional<builder::BuilderConfiguration> GetBuilderConfigurationFor(const st
            1. /* scale_length */,
            kZeroVector,
        }},
+      {"l_shape_road.osm",
+       builder::BuilderConfiguration{
+           maliput::api::RoadGeometryId{"l_shape_road"},
+           utilities::FindOSMResource("l_shape_road.osm"),
+           {0., 0.} /* origin */,
+           5e-2 /* linear_tolerance */,
+           1e-3 /* angular_tolerance */,
+           1. /* scale_length */,
+           kZeroVector,
+       }},
 
   };
 

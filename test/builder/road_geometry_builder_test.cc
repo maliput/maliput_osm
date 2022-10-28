@@ -95,6 +95,13 @@ std::vector<RoadGeometryBuilderTestParameters> InstantiateBuilderParameters() {
             {{{SegmentId("0")},
               {LaneId("1026"), LaneId("1022"), LaneId("1018"), LaneId("1014"), LaneId("1010"), LaneId("1006")}}}},
        }},
+      {"l_shape_road.osm",
+       "l_shape_road",
+       {
+           {JunctionId("0"), {{{SegmentId("0")}, {LaneId("1206")}}}},
+           {JunctionId("1"), {{{SegmentId("1")}, {LaneId("1335")}}}},
+           {JunctionId("2"), {{{SegmentId("2")}, {LaneId("1542")}}}},
+       }},
   };
 }
 
