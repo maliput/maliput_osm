@@ -71,6 +71,27 @@ BuilderConfiguration BuilderConfiguration::FromMap(const std::map<std::string, s
     builder_config.inertial_to_backend_frame_translation = maliput::math::Vector3::FromStr(it->second);
   }
 
+  it = config.find(config::kRuleRegistry);
+  if (it != config.end()) {
+    builder_config.rule_registry = std::make_optional(it->second);
+  }
+  it = config.find(config::kRoadRuleBook);
+  if (it != config.end()) {
+    builder_config.road_rule_book = std::make_optional(it->second);
+  }
+  it = config.find(config::kTrafficLightBook);
+  if (it != config.end()) {
+    builder_config.traffic_light_book = std::make_optional(it->second);
+  }
+  it = config.find(config::kPhaseRingBook);
+  if (it != config.end()) {
+    builder_config.phase_ring_book = std::make_optional(it->second);
+  }
+  it = config.find(config::kIntersectionBook);
+  if (it != config.end()) {
+    builder_config.intersection_book = std::make_optional(it->second);
+  }
+
   return builder_config;
 }
 
@@ -83,6 +104,21 @@ std::map<std::string, std::string> BuilderConfiguration::ToStringMap() const {
   config.emplace(config::kAngularTolerance, std::to_string(angular_tolerance));
   config.emplace(config::kScaleLength, std::to_string(scale_length));
   config.emplace(config::kInertialToBackendFrameTranslation, inertial_to_backend_frame_translation.to_str());
+  if (rule_registry.has_value()) {
+    config.emplace(config::kRuleRegistry, rule_registry.value());
+  }
+  if (road_rule_book.has_value()) {
+    config.emplace(config::kRoadRuleBook, road_rule_book.value());
+  }
+  if (traffic_light_book.has_value()) {
+    config.emplace(config::kTrafficLightBook, traffic_light_book.value());
+  }
+  if (phase_ring_book.has_value()) {
+    config.emplace(config::kPhaseRingBook, phase_ring_book.value());
+  }
+  if (intersection_book.has_value()) {
+    config.emplace(config::kIntersectionBook, intersection_book.value());
+  }
   return config;
 }
 
