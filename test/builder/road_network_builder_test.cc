@@ -119,7 +119,7 @@ INSTANTIATE_TEST_CASE_P(RoadNetworkBuilderValidatorTestGroup, RoadNetworkBuilder
 // - TrafficLightBook
 // - PhaseRingBook
 // - IntersectionBook
-// Except the RoadGeometry, the rest of the entities can be loaded via a YAML description provided in runtime.
+// Except the RoadGeometry, the rest of the entities can be loaded via a YAML descriptions provided at runtime.
 // This suite of tests guarantees that the RoadNetworkBuilder supports loading all the entities via YAML description.
 //
 // The map being used is loop_road_pedestrian_crosswalk.osm with its corresponding YAML description.
