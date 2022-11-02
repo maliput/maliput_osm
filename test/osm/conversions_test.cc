@@ -38,6 +38,7 @@
 #include <maliput_sparse/geometry/line_string.h>
 
 #include "maliput_osm/osm/lane.h"
+#include "osm/utilities/lanelet2.h"
 #include "test_utilities/osm_types_compare.h"
 #include "utilities/utilities.h"
 
@@ -45,6 +46,8 @@ namespace maliput_osm {
 namespace osm {
 namespace test {
 namespace {
+
+using maliput::api::LaneEnd;
 
 static constexpr double kTolerance{1e-6};
 
@@ -79,15 +82,15 @@ TEST(ToMaliput, Lanelet) {
           lanelet::Point3d{6, points_right[1].x(), points_right[1].y(), points_right[1].z()},
           lanelet::Point3d{7, points_right[2].x(), points_right[2].y(), points_right[2].z()}});
   const lanelet::Lanelet lanelet(kLaneIdNumber, lanelet_left, lanelet_right);
-  const auto lanelet_map = lanelet::utils::createMap({lanelet}, {});
+  const lanelet::LaneletMapPtr lanelet_map = lanelet::utils::createMap({lanelet}, {});
 
-  EXPECT_TRUE(test::CompareOSMLane(lane, ToMaliput(lanelet, lanelet_map->laneletLayer), kTolerance));
+  EXPECT_TRUE(test::CompareOSMLane(lane, ToMaliput(lanelet, lanelet_map), kTolerance));
 }
 
 // Tests ToMaliput conversion using multi_lanes_road.osm map file.
 class MultiLanesRoadMapToMaliputTest : public testing::Test {
  public:
-  const std::string kOSMFilePath = utilities::FindOSMResource("multi_lanes_road.osm");
+  const std::string kOSMFilePath = ::utilities::FindOSMResource("multi_lanes_road.osm");
   const lanelet::LaneletMapPtr lanelet_map_ = lanelet::load(kOSMFilePath, lanelet::Origin{lanelet::GPSPoint{0., 0.}});
 };
 
@@ -110,7 +113,7 @@ TEST_F(MultiLanesRoadMapToMaliputTest, LeftLane) {
 
   const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
   ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
-  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_->laneletLayer), kTolerance));
+  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_), kTolerance));
 }
 
 TEST_F(MultiLanesRoadMapToMaliputTest, RightLane) {
@@ -132,7 +135,7 @@ TEST_F(MultiLanesRoadMapToMaliputTest, RightLane) {
 
   const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
   ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
-  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_->laneletLayer), kTolerance));
+  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_), kTolerance));
 }
 
 TEST_F(MultiLanesRoadMapToMaliputTest, CenterLane) {
@@ -155,8 +158,247 @@ TEST_F(MultiLanesRoadMapToMaliputTest, CenterLane) {
 
   const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
   ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
-  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_->laneletLayer), kTolerance));
+  EXPECT_TRUE(test::CompareOSMLane(expected_lane, ToMaliput(*lanelet, lanelet_map_), kTolerance));
 }
+
+// Tests ToMaliput conversion for predecessors and successors fields using a map that has three consecutive lanes.
+class LShapeRoadMapToMaliputPredecessorSuccessorTest : public testing::Test {
+ public:
+  const std::string kOSMFilePath = ::utilities::FindOSMResource("l_shape_road.osm");
+  const lanelet::LaneletMapPtr lanelet_map_ = lanelet::load(kOSMFilePath, lanelet::Origin{lanelet::GPSPoint{0., 0.}});
+};
+
+TEST_F(LShapeRoadMapToMaliputPredecessorSuccessorTest, StartLane) {
+  constexpr int kLaneIdNumber{1206};
+  const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
+  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_successors{
+      {"1335", LaneEnd::Which::kStart}};
+  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_predecessors{};
+
+  const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
+  ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
+  const Lane converted_lane = ToMaliput(*lanelet, lanelet_map_);
+  ASSERT_EQ(lane_id, converted_lane.id);
+  EXPECT_EQ(expected_predecessors, converted_lane.predecessors);
+  EXPECT_EQ(expected_successors, converted_lane.successors);
+}
+
+TEST_F(LShapeRoadMapToMaliputPredecessorSuccessorTest, MiddleLane) {
+  constexpr int kLaneIdNumber{1335};
+  const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
+  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_successors{
+      {"1542", LaneEnd::Which::kStart}};
+  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_predecessors{
+      {"1206", LaneEnd::Which::kFinish}};
+
+  const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
+  ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
+  const Lane converted_lane = ToMaliput(*lanelet, lanelet_map_);
+  ASSERT_EQ(lane_id, converted_lane.id);
+  EXPECT_EQ(expected_predecessors, converted_lane.predecessors);
+  EXPECT_EQ(expected_successors, converted_lane.successors);
+}
+
+TEST_F(LShapeRoadMapToMaliputPredecessorSuccessorTest, EndLane) {
+  constexpr int kLaneIdNumber{1542};
+  const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
+  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_successors{};
+  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_predecessors{
+      {"1335", LaneEnd::Which::kFinish}};
+
+  const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
+  ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
+  const Lane converted_lane = ToMaliput(*lanelet, lanelet_map_);
+  ASSERT_EQ(lane_id, converted_lane.id);
+  EXPECT_EQ(expected_predecessors, converted_lane.predecessors);
+  EXPECT_EQ(expected_successors, converted_lane.successors);
+}
+
+struct AdjacentPredecessorSuccessorTest {
+  int id;
+  std::optional<Lane::Id> left_lane_id;
+  std::optional<Lane::Id> right_lane_id;
+  std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> predecessors;
+  std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> successors;
+};
+
+std::vector<AdjacentPredecessorSuccessorTest> GetAdjacentPredecessorSuccessorTest() {
+  return {
+      {
+          12,
+          {} /* left_lane */,
+          "23" /* right_lane */,
+          {} /* predecessors */,
+          {{"56", LaneEnd::Which::kStart}} /* successors */,
+      },
+      {
+          23,
+          "12" /* left_lane */,
+          "34" /* right_lane */,
+          {} /* predecessors */,
+          {{"67", LaneEnd::Which::kStart}} /* successors */,
+      },
+      {
+          34,
+          "23" /* left_lane */,
+          {} /* right_lane */,
+          {} /* predecessors */,
+          {{"78", LaneEnd::Which::kStart}} /* successors */,
+      },
+      {
+          56,
+          {} /* left_lane */,
+          "67" /* right_lane */,
+          {{"12", LaneEnd::Which::kFinish}} /* predecessors */,
+          {} /* successors */,
+      },
+      {
+          67,
+          "56" /* left_lane */,
+          "78" /* right_lane */,
+          {{"23", LaneEnd::Which::kFinish}} /* predecessors */,
+          {{"910", LaneEnd::Which::kStart}} /* successors */,
+      },
+      {
+          78,
+          "67" /* left_lane */,
+          {} /* right_lane */,
+          {{"34", LaneEnd::Which::kFinish}} /* predecessors */,
+          {} /* successors */,
+      },
+      {
+          910,
+          {} /* left_lane */,
+          {} /* right_lane */,
+          {{"67", LaneEnd::Which::kFinish}} /* predecessors */,
+          {{"1112", LaneEnd::Which::kStart}, {"1314", LaneEnd::Which::kStart}} /* successors */,
+      },
+      {
+          1112,
+          {} /* left_lane */,
+          {} /* right_lane */,
+          {{"910", LaneEnd::Which::kFinish}, {"1314", LaneEnd::Which::kStart}} /* predecessors */,
+          {} /* successors */,
+      },
+      {
+          1314,
+          {} /* left_lane */,
+          {} /* right_lane */,
+          {{"910", LaneEnd::Which::kFinish}, {"1112", LaneEnd::Which::kStart}} /* predecessors */,
+          {} /* successors */,
+      },
+  };
+}
+
+// Tests adjacent and predecessors/successors lanes
+class MultiLaneMultiSegmentRoadAdjacentPredecessorSuccessorTest
+    : public testing::TestWithParam<AdjacentPredecessorSuccessorTest> {
+ public:
+  const lanelet::LaneletMapPtr lanelet_map_ = osm::test::utilities::CreateLanelet2Map();
+  const AdjacentPredecessorSuccessorTest test_case_ = GetParam();
+};
+
+TEST_P(MultiLaneMultiSegmentRoadAdjacentPredecessorSuccessorTest, Test) {
+  const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{test_case_.id});
+  ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
+  const Lane converted_lane = ToMaliput(*lanelet, lanelet_map_);
+  ASSERT_EQ(std::to_string(test_case_.id), converted_lane.id);
+  EXPECT_EQ(test_case_.predecessors, converted_lane.predecessors);
+  EXPECT_EQ(test_case_.successors, converted_lane.successors);
+}
+
+INSTANTIATE_TEST_CASE_P(MultiLaneMultiSegmentRoadAdjacentPredecessorSuccessorTestGroup,
+                        MultiLaneMultiSegmentRoadAdjacentPredecessorSuccessorTest,
+                        ::testing::ValuesIn(GetAdjacentPredecessorSuccessorTest()));
+
+std::vector<AdjacentPredecessorSuccessorTest> GetAdjacentPredecessorSuccessorWithInversionsTest() {
+  return {
+      {
+          12,
+          {} /* left_lane */,
+          "23" /* right_lane */,
+          {} /* predecessors */,
+          {{"65", LaneEnd::Which::kFinish}} /* successors */,
+      },
+      {
+          23,
+          "12" /* left_lane */,
+          "34" /* right_lane */,
+          {} /* predecessors */,
+          {{"76", LaneEnd::Which::kFinish}} /* successors */,
+      },
+      {
+          34,
+          "23" /* left_lane */,
+          {} /* right_lane */,
+          {} /* predecessors */,
+          {{"87", LaneEnd::Which::kFinish}} /* successors */,
+      },
+      {
+          65,
+          "76" /* left_lane */,
+          {} /* right_lane */,
+          {{"910", LaneEnd::Which::kStart}} /* predecessors */,
+          {{"12", LaneEnd::Which::kFinish}} /* successors */,
+      },
+      {
+          76,
+          "87" /* left_lane */,
+          "65" /* right_lane */,
+          {{"1011", LaneEnd::Which::kStart}} /* predecessors */,
+          {{"23", LaneEnd::Which::kFinish}} /* successors */,
+      },
+      {
+          87,
+          {} /* left_lane */,
+          "76" /* right_lane */,
+          {{"1112", LaneEnd::Which::kStart}} /* predecessors */,
+          {{"34", LaneEnd::Which::kFinish}} /* successors */,
+      },
+      {
+          910,
+          {} /* left_lane */,
+          "1011" /* right_lane */,
+          {{"65", LaneEnd::Which::kStart}} /* predecessors */,
+          {} /* successors */,
+      },
+      {
+          1011,
+          "910" /* left_lane */,
+          "1112" /* right_lane */,
+          {{"76", LaneEnd::Which::kStart}} /* predecessors */,
+          {} /* successors */,
+      },
+      {
+          1112,
+          "1011" /* left_lane */,
+          {} /* right_lane */,
+          {{"87", LaneEnd::Which::kStart}} /* predecessors */,
+          {} /* successors */,
+      },
+  };
+}
+
+// Tests adjacent and predecessors/successors lanes when inverted lanes are present.
+class InvertedConnectionsAdjacentPredecessorSuccessorTest
+    : public testing::TestWithParam<AdjacentPredecessorSuccessorTest> {
+ public:
+  const lanelet::LaneletMapPtr lanelet_map_ = osm::test::utilities::CreateInvertedLaneMap();
+  const AdjacentPredecessorSuccessorTest test_case_ = GetParam();
+};
+
+TEST_P(InvertedConnectionsAdjacentPredecessorSuccessorTest, Test) {
+  const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{test_case_.id});
+  ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
+  const Lane converted_lane = ToMaliput(*lanelet, lanelet_map_);
+  ASSERT_EQ(std::to_string(test_case_.id), converted_lane.id);
+  EXPECT_EQ(test_case_.predecessors, converted_lane.predecessors);
+  EXPECT_EQ(test_case_.successors, converted_lane.successors);
+}
+
+INSTANTIATE_TEST_CASE_P(InvertedConnectionsAdjacentPredecessorSuccessorTestGroup,
+                        InvertedConnectionsAdjacentPredecessorSuccessorTest,
+                        ::testing::ValuesIn(GetAdjacentPredecessorSuccessorWithInversionsTest()));
 
 }  // namespace
 }  // namespace test
