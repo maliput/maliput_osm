@@ -50,10 +50,8 @@ static constexpr bool kRightBound{!kLeftBound};
 std::optional<maliput::api::LaneEnd::Which> GetLaneEndWhich(const lanelet::ConstLineString3d& ls,
                                                             const lanelet::ConstLineString3d& connected_ls) {
   if (ls.front() == connected_ls.front() || ls.back() == connected_ls.front()) {
-    // <--|-->|-->|
     return maliput::api::LaneEnd::Which::kStart;
   } else if (ls.front() == connected_ls.back() || ls.back() == connected_ls.back()) {
-    // -->|-->|<--
     return maliput::api::LaneEnd::Which::kFinish;
   }
   return std::nullopt;
@@ -77,7 +75,7 @@ std::pair<Lane::Id, maliput::api::LaneEnd::Which> GetIdLaneEnd(const lanelet::Co
 }
 
 // Get Lanelets that share points to given line strings that are not @p lanelet
-std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> GetLaneletsThatUsesLineStrings(
+std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> GetLaneletsUsingLineStrings(
     const lanelet::Lanelet& lanelet, const lanelet::LineStrings3d& line_strings,
     const lanelet::LaneletLayer& lanelet_layer, bool left) {
   std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> lanelets_with_share_line_strings;
@@ -159,11 +157,11 @@ Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletMapPtr& ma
 
     // Obtains the lanelets that uses the left_point.
     std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> lanelets_for_left_point =
-        GetLaneletsThatUsesLineStrings(lanelet, line_strings_sharing_left_point, *map_layer, kLeftBound);
+        GetLaneletsUsingLineStrings(lanelet, line_strings_sharing_left_point, *map_layer, kLeftBound);
 
     // Obtains the lanelets that uses the right_point.
     std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> lanelets_for_right_point =
-        GetLaneletsThatUsesLineStrings(lanelet, line_strings_sharing_right_point, *map_layer, kRightBound);
+        GetLaneletsUsingLineStrings(lanelet, line_strings_sharing_right_point, *map_layer, kRightBound);
 
     // Intersects both sets to obtain the lanelets that uses both points.
     const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> lanelets_for_end_points{
