@@ -48,9 +48,9 @@ maliput_sparse::geometry::LineString3d ToMaliput(const lanelet::ConstLineString3
 /// maliput_osm::osm::Lane is an struct with several fields.
 ///
 /// @param lanelet The lanelet::Lanelet to convert.
-/// @param map_layer lanelet::LaneletLayer for finding adjacent lanelets.
+/// @param map lanelet::LaneletMapPtr for finding adjacent and consecutive lanelets.
 /// @returns The converted maliput_osm::osm::Lane.
-Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletLayer& map_layer);
+Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletMapPtr& map);
 
 }  // namespace osm
 }  // namespace maliput_osm
