@@ -38,6 +38,13 @@
 namespace maliput_osm {
 namespace osm {
 
+// @param[out] connections
+void AddToConnections(const Connection& connection, std::vector<osm::Connection>& connections) {
+  if(std::find(connections.begin(), connections.end(), connection) == connections.end()) {
+    connections.push_back(connection);
+  }
+}
+
 OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& config) {
   using namespace lanelet;
   const LaneletMapPtr map = load(osm_file_path, Origin{GPSPoint{config.origin.x(), config.origin.y()}});
@@ -57,11 +64,35 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
     }
     segments_.emplace(segment->id, std::move(segment.value()));
   }
+
+  // Fill up connections.
+  for (const auto& segment : segments_) {
+    for (const auto& lane : segment.second.lanes) {
+      for(const auto& predecessor : lane.predecessors) {
+        const Connection connection{predecessor.first, predecessor.second, lane.id, maliput::api::LaneEnd::kStart};
+        AddToConnections(connection, connections_);
+      }
+      for(const auto& [successor_id, successor_which] : lane.successors) {
+        const Connection connection{lane.id, maliput::api::LaneEnd::kFinish, successor_id, successor_which};
+        AddToConnections(connection, connections_);
+      }
+    }
+  }
+
+  // Fill up junctions
+  
+  // TODO
+  // 1. Find lanes with more than one predecessor or successor.
+  // 2. Find the segmments for the predeceissor/successor of each lane found in 1.
+  // 3. Group together the segments with certain connections.
+  
 }
 
 OSMManager::~OSMManager() = default;
 
 const std::unordered_map<Segment::Id, Segment>& OSMManager::GetOSMSegments() const { return segments_; }
+
+const std::vector<osm::Connection>& OSMManager::GetOSMConnections() const {return connections_;}
 
 std::optional<Segment> OSMManager::CreateSegmentForLane(const Lane& lane,
                                                         const std::unordered_map<Lane::Id, Lane>& lanes) {
