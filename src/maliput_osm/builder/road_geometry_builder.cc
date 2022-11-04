@@ -71,8 +71,9 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
     segment_builder.EndSegment().EndJunction();
   }
   maliput_sparse::builder::BranchPointBuilder bp_builder = rg_builder.StartBranchPoints();
-  for(const auto& connection : connections) {
-    bp_builder.Connect(maliput::api::LaneId{connection.from_id}, connection.from_end, maliput::api::LaneId{connection.to_id}, connection.to_end);
+  for (const auto& connection : connections) {
+    bp_builder.Connect(maliput::api::LaneId{connection.from_id}, connection.from_end,
+                       maliput::api::LaneId{connection.to_id}, connection.to_end);
   }
   bp_builder.EndBranchPoints();
 

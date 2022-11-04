@@ -38,7 +38,6 @@
 #include "maliput_osm/osm/connection.h"
 #include "maliput_osm/osm/lane.h"
 #include "maliput_osm/osm/segment.h"
-#include "maliput_osm/osm/connection.h"
 #include "utilities/id_gen.h"
 
 namespace maliput_osm {

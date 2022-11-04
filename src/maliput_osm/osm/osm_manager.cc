@@ -70,31 +70,23 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
   // Fill up connections.
   for (const auto& segment : segments_) {
     for (const auto& lane : segment.second.lanes) {
-      for(const auto& predecessor : lane.predecessors) {
+      for (const auto& predecessor : lane.predecessors) {
         const Connection connection{predecessor.first, predecessor.second, lane.id, maliput::api::LaneEnd::kStart};
         AddToConnections(connection, connections_);
       }
-      for(const auto& [successor_id, successor_which] : lane.successors) {
-        const Connection connection{lane.id, maliput::api::LaneEnd::kFinish, successor_id, successor_which};
+      for (const auto& successor : lane.successors) {
+        const Connection connection{lane.id, maliput::api::LaneEnd::kFinish, successor.first, successor.second};
         AddToConnections(connection, connections_);
       }
     }
   }
-
-  // Fill up junctions
-  
-  // TODO
-  // 1. Find lanes with more than one predecessor or successor.
-  // 2. Find the segmments for the predeceissor/successor of each lane found in 1.
-  // 3. Group together the segments with certain connections.
-  
 }
 
 OSMManager::~OSMManager() = default;
 
 const std::unordered_map<Segment::Id, Segment>& OSMManager::GetOSMSegments() const { return segments_; }
 
-const std::vector<osm::Connection>& OSMManager::GetOSMConnections() const {return connections_;}
+const std::vector<osm::Connection>& OSMManager::GetOSMConnections() const { return connections_; }
 
 std::optional<Segment> OSMManager::CreateSegmentForLane(const Lane& lane,
                                                         const std::unordered_map<Lane::Id, Lane>& lanes) {
