@@ -45,6 +45,7 @@ namespace test {
 namespace {
 
 using maliput::api::JunctionId;
+using maliput::api::LaneEnd;
 using maliput::api::LaneId;
 using maliput::api::SegmentId;
 
@@ -187,6 +188,168 @@ TEST_P(RoadGeometryBuilderBaseTest, TestGraph) {
 
 INSTANTIATE_TEST_CASE_P(RoadGeometryBuilderBaseTestGroup, RoadGeometryBuilderBaseTest,
                         ::testing::ValuesIn(InstantiateBuilderParameters()));
+
+// Compare functor between a pair <LaneId, LaneEnd::Which> and a LaneEnd.
+// It is convenient for std::find_if().
+struct CompareConnectionExpectation {
+  MALIPUT_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(CompareConnectionExpectation)
+
+  CompareConnectionExpectation() = delete;
+
+  explicit CompareConnectionExpectation(const LaneEnd _lane_end) : lane_end(_lane_end) {}
+
+  bool operator()(const std::pair<LaneId, LaneEnd::Which>& lane_id_and_end) {
+    return (lane_end.lane->id() == lane_id_and_end.first) && (lane_end.end == lane_id_and_end.second);
+  }
+
+  LaneEnd lane_end;
+};
+
+// Alternative to BranchPoint that instead of using Lane pointers, uses LaneIds
+// which are easy to define from the test description point of view.
+struct ConnectionExpectation {
+  MALIPUT_DEFAULT_COPY_AND_MOVE_AND_ASSIGN(ConnectionExpectation)
+
+  ConnectionExpectation() = default;
+
+  // Constructs the expectation based on two collections of LaneIds and
+  // LaneEnd::Which pairs.
+  //
+  // @param x_side_in maps to the A/B side of the BranchPoint to evaluate.
+  // @param y_side_in maps to the B/A side of the BranchPoint to evaluate.
+  ConnectionExpectation(const std::vector<std::pair<LaneId, LaneEnd::Which>>& x_side_in,
+                        const std::vector<std::pair<LaneId, LaneEnd::Which>>& y_side_in)
+      : x_side(x_side_in), y_side(y_side_in) {}
+
+  std::vector<std::pair<LaneId, LaneEnd::Which>> x_side{};
+  std::vector<std::pair<LaneId, LaneEnd::Which>> y_side{};
+};
+
+// Holds the parameters for a BranchPoint test.
+struct BuilderBranchPointTestParameters {
+  std::string osm_file{};
+  std::string road_geometry_id{};
+  std::map<LaneId, std::pair<ConnectionExpectation, ConnectionExpectation>> expected_connections;
+};
+
+// Returns a vector of test parameters for the Builder BranchPoint test.
+std::vector<BuilderBranchPointTestParameters> InstantiateBuilderBranchPointParameters() {
+  return {
+      {"l_shape_road.osm",
+       "l_shape_road",
+       {
+           {LaneId("1206"),
+            {ConnectionExpectation({{LaneId("1206"), LaneEnd::Which::kStart}}, {}),
+             ConnectionExpectation({{LaneId("1206"), LaneEnd::Which::kFinish}},
+                                   {{LaneId("1335"), LaneEnd::Which::kStart}})}},
+           {LaneId("1335"),
+            {ConnectionExpectation({{LaneId("1206"), LaneEnd::Which::kFinish}},
+                                   {{LaneId("1335"), LaneEnd::Which::kStart}}),
+             ConnectionExpectation({{LaneId("1335"), LaneEnd::Which::kFinish}},
+                                   {{LaneId("1542"), LaneEnd::Which::kStart}})}},
+           {LaneId("1542"),
+            {ConnectionExpectation({{LaneId("1335"), LaneEnd::Which::kFinish}},
+                                   {{LaneId("1542"), LaneEnd::Which::kStart}}),
+             ConnectionExpectation({{LaneId("1542"), LaneEnd::Which::kFinish}}, {})}},
+       }},
+  };
+}
+
+// Class to setup the RoadGeometry and later test BranchPoint formation.
+class BuilderBranchPointTest : public ::testing::TestWithParam<BuilderBranchPointTestParameters> {
+ protected:
+  //@{  Tolerances set to match the involved geometries and the parser resolution.
+  static constexpr double kLinearTolerance{1e-6};
+  static constexpr double kAngularTolerance{1e-6};
+  static constexpr double kScaleLength{1.};
+  //@}
+
+  void SetUp() override {
+    const auto builder_config = maliput_osm::test::GetBuilderConfigurationFor(case_.osm_file);
+    ASSERT_NE(builder_config, std::nullopt);
+    auto osm_manager =
+        std::make_unique<osm::OSMManager>(builder_config->osm_file, osm::ParserConfig{builder_config->origin});
+    rg_ = builder::RoadGeometryBuilder(std::move(osm_manager), builder_config.value())();
+    expected_connections = GetParam().expected_connections;
+  }
+
+  const BuilderBranchPointTestParameters case_ = GetParam();
+  std::unique_ptr<const maliput::api::RoadGeometry> rg_;
+  std::map<LaneId, std::pair<ConnectionExpectation, ConnectionExpectation>> expected_connections;
+};
+
+// Tests Lane and BranchPoint formation.
+TEST_P(BuilderBranchPointTest, LaneAndBranchPointTest) {
+  // Evaluates that LaneEnds on both bp sides are the expected ones.
+  auto test_branch_point = [](const maliput::api::BranchPoint* bp,
+                              const ConnectionExpectation& connection_expectation) {
+    ASSERT_NE(bp->GetASide(), nullptr);
+    ASSERT_NE(bp->GetBSide(), nullptr);
+
+    // Evaluates which side belongs to each connection expectation.
+    const maliput::api::LaneEndSet* a_side = bp->GetASide();
+    const maliput::api::LaneEndSet* b_side = bp->GetBSide();
+
+    ASSERT_TRUE(a_side->size() != 0 || b_side->size() != 0);
+
+    std::pair<const maliput::api::LaneEndSet*, std::vector<std::pair<LaneId, LaneEnd::Which>>> first_side;
+    std::pair<const maliput::api::LaneEndSet*, std::vector<std::pair<LaneId, LaneEnd::Which>>> second_side;
+
+    const LaneEnd dut = a_side->size() != 0 ? a_side->get(0) : b_side->get(0);
+    const CompareConnectionExpectation cmp(dut);
+    if (std::find_if(connection_expectation.x_side.begin(), connection_expectation.x_side.end(), cmp) !=
+        connection_expectation.x_side.end()) {
+      // a --> x
+      first_side.first = a_side;
+      first_side.second = connection_expectation.x_side;
+      // b --> y
+      second_side.first = b_side;
+      second_side.second = connection_expectation.y_side;
+    } else if (std::find_if(connection_expectation.y_side.begin(), connection_expectation.y_side.end(), cmp) !=
+               connection_expectation.y_side.end()) {
+      // b --> x
+      first_side.first = b_side;
+      first_side.second = connection_expectation.x_side;
+      // x --> y
+      second_side.first = a_side;
+      second_side.second = connection_expectation.y_side;
+    } else {
+      GTEST_FAIL() << "BranchPoint: " << bp->id().string() << " does not match the expectation.";
+    }
+
+    for (int lane_end_index = 0; lane_end_index < first_side.first->size(); ++lane_end_index) {
+      const LaneEnd dut = first_side.first->get(lane_end_index);
+      const CompareConnectionExpectation cmp(dut);
+      EXPECT_NE(std::find_if(first_side.second.begin(), first_side.second.end(), cmp), first_side.second.end());
+    }
+
+    for (int lane_end_index = 0; lane_end_index < second_side.first->size(); ++lane_end_index) {
+      const LaneEnd dut = second_side.first->get(lane_end_index);
+      const CompareConnectionExpectation cmp(dut);
+      EXPECT_NE(std::find_if(second_side.second.begin(), second_side.second.end(), cmp), second_side.second.end());
+    }
+  };
+
+  for (const auto& lane_id_connections : expected_connections) {
+    const maliput::api::Lane* lane = rg_->ById().GetLane(lane_id_connections.first);
+    EXPECT_NE(lane, nullptr);
+
+    // Analyzes A and B sides at the start BranchPoint.
+    const maliput::api::BranchPoint* start_bp = lane->GetBranchPoint(LaneEnd::Which::kStart);
+    EXPECT_NE(start_bp, nullptr);
+    EXPECT_EQ(start_bp->road_geometry(), rg_.get());
+    test_branch_point(start_bp, lane_id_connections.second.first);
+
+    // Analyzes A and B sides at the end BranchPoint.
+    const maliput::api::BranchPoint* end_bp = lane->GetBranchPoint(LaneEnd::Which::kFinish);
+    EXPECT_NE(end_bp, nullptr);
+    EXPECT_EQ(end_bp->road_geometry(), rg_.get());
+    test_branch_point(end_bp, lane_id_connections.second.second);
+  }
+}
+
+INSTANTIATE_TEST_CASE_P(BuilderBranchPointTestGroup, BuilderBranchPointTest,
+                        ::testing::ValuesIn(InstantiateBuilderBranchPointParameters()));
 
 }  // namespace
 }  // namespace test
