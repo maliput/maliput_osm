@@ -34,7 +34,10 @@
 #include <string>
 #include <unordered_set>
 
+#include <maliput_sparse/geometry/utility/geometry.h>
+
 using maliput_sparse::geometry::LineString3d;
+using namespace maliput_sparse::geometry;
 
 namespace maliput_osm {
 namespace osm {
@@ -109,6 +112,59 @@ std::unordered_map<T, U> IntersectMaps(const std::unordered_map<T, U>& map1, con
   return intersection;
 }
 
+// Get the 2d-tangent of the @p lanelet at the selected @p lane_end_which.
+// As the lanelet is defined by left and right boundaries, the tangent of the lanelet is calculated using arbitrarily the left bound.
+maliput::math::Vector2 Get2DTangentAtLaneEnd(const lanelet::ConstLanelet lanelet,
+                                             const maliput::api::LaneEnd::Which& lane_end_which) {
+  // Using left bound as default.
+  const LineString3d line_string = ToMaliput(lanelet.leftBound());
+  const double p = lane_end_which == maliput::api::LaneEnd::Which::kStart ? 0. : line_string.length();
+  return utility::Get2DTangentAtP(line_string, p);
+}
+
+// Get the delta of the angle between two vectors.
+template <typename T>
+double GetDiffAngle(const T& lhs, const T& rhs) {
+  return std::acos(lhs.dot(rhs) / (lhs.norm() * rhs.norm()));
+}
+
+// Determines whether two maliput::api::LaneEnd::Which are aligned or not.
+// Aligned means that a kStart connects to a kFinish and vice versa.
+bool AreLaneEndsAligned(const maliput::api::LaneEnd::Which& lhs, const maliput::api::LaneEnd::Which& rhs) {
+  return (lhs == maliput::api::LaneEnd::Which::kStart && rhs == maliput::api::LaneEnd::Which::kFinish) ||
+         (lhs == maliput::api::LaneEnd::Which::kFinish && rhs == maliput::api::LaneEnd::Which::kStart);
+}
+
+}  // namespace
+
+// Filters out lanelets that are not considered connected because of having a jump in the heading in their limits.
+// @param lanelet The lanelet to filter out the connected lanelets.
+// @param lane_end_which Lane end of the lanelet where the connections are made.
+// @param connections The connections obtained from the geometrical definition of the map.
+// @param lanelet_layer The lanelet layer to get the connected lanelets.
+// @returns The filtered connections.
+std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> FilterOutByDirection(
+    const lanelet::Lanelet& lanelet, const maliput::api::LaneEnd::Which& lane_end_which,
+    const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which>& connections,
+    const lanelet::LaneletLayer& lanelet_layer) {
+  using maliput::api::LaneEnd;
+  const maliput::math::Vector2 tangent_at_end = Get2DTangentAtLaneEnd(lanelet, lane_end_which);
+  std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> filtered_connections;
+  for (const auto& [connected_lanelet_id, connected_end_which] : connections) {
+    const auto connected_lanelet = lanelet_layer.find(lanelet::Id(std::stoul(connected_lanelet_id)));
+    MALIPUT_THROW_UNLESS(connected_lanelet != lanelet_layer.end());
+    const maliput::math::Vector2 connected_tangent_at_end =
+        Get2DTangentAtLaneEnd(*connected_lanelet, connected_end_which);
+
+    const bool aligned = AreLaneEndsAligned(lane_end_which, connected_end_which);
+    const double angle = GetDiffAngle(tangent_at_end, connected_tangent_at_end * (aligned ? 1. : -1.));
+
+    if (angle < M_PI_2) {
+      filtered_connections.insert({connected_lanelet_id, connected_end_which});
+    }
+  }
+  return filtered_connections;
+
 }  // namespace
 
 LineString3d ToMaliput(const lanelet::ConstLineString3d& line_string) {
@@ -170,10 +226,21 @@ Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletMapPtr& ma
     return lanelets_for_end_points;
   };
 
+  // Filter out the lane ids of lanelets that approach the points from an off direction.
   const auto predecessor_lanelets = find_usage_of_end_points(lanelet.leftBound().front(), lanelet.rightBound().front());
   const auto successor_lanelets = find_usage_of_end_points(lanelet.leftBound().back(), lanelet.rightBound().back());
+  const auto filtered_predecessor_lanelets =
+      FilterOutByDirection(lanelet, maliput::api::LaneEnd::Which::kStart, predecessor_lanelets, *map_layer);
+  const auto filtered_successor_lanelets =
+      FilterOutByDirection(lanelet, maliput::api::LaneEnd::Which::kFinish, successor_lanelets, *map_layer);
 
-  return {id, left_bound, right_bound, left_lane_id, right_lane_id, successor_lanelets, predecessor_lanelets};
+  return {id,
+          left_bound,
+          right_bound,
+          left_lane_id,
+          right_lane_id,
+          filtered_successor_lanelets,
+          filtered_predecessor_lanelets};
 }
 
 }  // namespace osm
