@@ -113,7 +113,8 @@ std::unordered_map<T, U> IntersectMaps(const std::unordered_map<T, U>& map1, con
 }
 
 // Get the 2d-tangent of the @p lanelet at the selected @p lane_end_which.
-// As the lanelet is defined by left and right boundaries, the tangent of the lanelet is calculated using arbitrarily the left bound.
+// As the lanelet is defined by left and right boundaries, the tangent of the lanelet is calculated using arbitrarily
+// the left bound.
 maliput::math::Vector2 Get2DTangentAtLaneEnd(const lanelet::ConstLanelet lanelet,
                                              const maliput::api::LaneEnd::Which& lane_end_which) {
   // Using left bound as default.
