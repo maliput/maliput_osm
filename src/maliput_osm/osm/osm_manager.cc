@@ -37,14 +37,16 @@
 
 namespace maliput_osm {
 namespace osm {
+namespace {
 
 // @param[out] connections
 void AddToConnections(const Connection& connection, std::vector<osm::Connection>& connections) {
-  if(std::find(connections.begin(), connections.end(), connection) == connections.end()) {
+  if (std::find(connections.begin(), connections.end(), connection) == connections.end()) {
     connections.push_back(connection);
   }
 }
 
+}  // namespace
 OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& config) {
   using namespace lanelet;
   const LaneletMapPtr map = load(osm_file_path, Origin{GPSPoint{config.origin.x(), config.origin.y()}});

@@ -35,6 +35,7 @@
 
 #include <maliput/common/maliput_copyable.h>
 
+#include "maliput_osm/osm/connection.h"
 #include "maliput_osm/osm/lane.h"
 #include "maliput_osm/osm/segment.h"
 #include "maliput_osm/osm/connection.h"
@@ -65,6 +66,7 @@ class OSMManager {
   /// Gets the map's segments.
   const std::unordered_map<Segment::Id, Segment>& GetOSMSegments() const;
 
+  /// Gets connections among the map's lanes.
   const std::vector<osm::Connection>& GetOSMConnections() const;
 
  private:

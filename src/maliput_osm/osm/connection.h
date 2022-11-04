@@ -36,12 +36,20 @@
 namespace maliput_osm {
 namespace osm {
 
+/// Defines a connection between two lanes.
+/// The lanes can be connected from either end.
+/// Two connections are considered equal if they connect the same lanes using same ends without regard to the order.
 struct Connection {
+  /// The lane that is connected from.
   osm::Lane::Id from_id;
+  /// The end of the lane that is connected from.
   maliput::api::LaneEnd::Which from_end;
+  /// The lane that is connected to
   osm::Lane::Id to_id;
+  /// The end of the lane that is connected to.
   maliput::api::LaneEnd::Which to_end;
 
+  /// Equality operator.
   bool operator==(const Connection& other) const;
 };
 
