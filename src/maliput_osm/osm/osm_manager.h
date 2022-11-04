@@ -36,6 +36,7 @@
 #include <maliput/common/maliput_copyable.h>
 
 #include "maliput_osm/osm/connection.h"
+#include "maliput_osm/osm/junction.h"
 #include "maliput_osm/osm/lane.h"
 #include "maliput_osm/osm/segment.h"
 #include "utilities/id_gen.h"
@@ -62,8 +63,9 @@ class OSMManager {
 
   ~OSMManager();
 
-  /// Gets the map's segments.
-  const std::unordered_map<Segment::Id, Segment>& GetOSMSegments() const;
+  /// Gets the map's junctions.
+  /// Junction's ids are generated as combination of the contained segment's ids connected by a "_"
+  const std::unordered_map<Junction::Id, Junction>& GetOSMJunctions() const;
 
   /// Gets connections among the map's lanes.
   const std::vector<osm::Connection>& GetOSMConnections() const;
@@ -93,16 +95,14 @@ class OSMManager {
   // @param lane The lane to create a Segment from.
   // @param lanes The map of all lanes.
   // @returns A populated Segment or std::nullopt when the lane already belongs to a segment.
-  std::optional<Segment> CreateSegmentForLane(const Lane& lane, const std::unordered_map<Lane::Id, Lane>& lanes);
+  std::optional<Segment> CreateSegmentForLane(const Lane& lane, const std::unordered_map<Lane::Id, Lane>& lanes,
+                                              const std::unordered_map<Segment::Id, Segment>& segments);
 
   // Id generator for the segments.
   utilities::IdGen<Segment::Id> segment_id_gen_;
 
-  // Id generator for the junctions.
-  utilities::IdGen<std::string> junction_id_gen_;
-
-  // Collection of segments.
-  std::unordered_map<Segment::Id, Segment> segments_{};
+  // Collection of junctions.
+  std::unordered_map<Junction::Id, Junction> junctions_{};
 
   // Collection of connections;
   std::vector<osm::Connection> connections_{};
