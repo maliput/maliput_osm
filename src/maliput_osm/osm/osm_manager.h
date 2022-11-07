@@ -67,7 +67,7 @@ class OSMManager {
   /// Junction's ids are generated as combination of the contained segment's ids connected by a "_"
   const std::unordered_map<Junction::Id, Junction>& GetOSMJunctions() const;
 
-  /// Gets connections among the map's lanes.
+  /// Gets connections between the map's lanes.
   const std::vector<osm::Connection>& GetOSMConnections() const;
 
  private:

@@ -229,7 +229,7 @@ struct ConnectionExpectation {
 struct BuilderBranchPointTestParameters {
   std::string osm_file{};
   std::string road_geometry_id{};
-  std::map<LaneId, std::pair<ConnectionExpectation, ConnectionExpectation>> expected_connections;
+  std::unordered_map<LaneId, std::pair<ConnectionExpectation, ConnectionExpectation>> expected_connections;
 };
 
 // Returns a vector of test parameters for the Builder BranchPoint test.
@@ -275,7 +275,7 @@ class BuilderBranchPointTest : public ::testing::TestWithParam<BuilderBranchPoin
 
   const BuilderBranchPointTestParameters case_ = GetParam();
   std::unique_ptr<const maliput::api::RoadGeometry> rg_;
-  std::map<LaneId, std::pair<ConnectionExpectation, ConnectionExpectation>> expected_connections;
+  std::unordered_map<LaneId, std::pair<ConnectionExpectation, ConnectionExpectation>> expected_connections;
 };
 
 // Tests Lane and BranchPoint formation.

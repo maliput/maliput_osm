@@ -33,11 +33,24 @@
 #include <string>
 #include <unordered_set>
 
-#include <maliput/api/lane_data.h>
 #include <maliput_sparse/geometry/line_string.h>
 
 namespace maliput_osm {
 namespace osm {
+
+struct LaneEnd {
+  /// Labels for the endpoints of a lanelet.
+  enum class Which {
+    kStart,   //> The start of the lanelet.
+    kFinish,  //> The end of the lanelet.
+  };
+  bool operator==(const LaneEnd& other) const;
+
+  // The lanelet id.
+  std::string lane_id;
+  // The endpoint of the lanelet.
+  Which end;
+};
 
 /// A lane in an Lanelet2-OSM road.
 struct Lane {
@@ -45,10 +58,7 @@ struct Lane {
 
   /// Equality operator.
   /// @param other The other object to compare against.
-  bool operator==(const Lane& other) const {
-    return id == other.id && left == other.left && right == other.right && left_lane_id == other.left_lane_id &&
-           right_lane_id == other.right_lane_id && successors == other.successors && predecessors == other.predecessors;
-  }
+  bool operator==(const Lane& other) const;
 
   /// Id of the lane.
   Id id{};
@@ -61,9 +71,9 @@ struct Lane {
   /// The id of the lane to the right of this lane.
   std::optional<Id> right_lane_id;
   /// The ids of the lanes that follow this lane.
-  std::unordered_map<Id, maliput::api::LaneEnd::Which> successors;
+  std::unordered_map<Id, LaneEnd> successors;
   /// The ids of the lanes that precede this lane.
-  std::unordered_map<Id, maliput::api::LaneEnd::Which> predecessors;
+  std::unordered_map<Id, LaneEnd> predecessors;
 };
 
 }  // namespace osm
