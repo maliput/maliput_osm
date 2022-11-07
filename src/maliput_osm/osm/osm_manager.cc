@@ -47,11 +47,11 @@ void AddToConnections(const Connection& connection, std::vector<Connection>* con
   }
 }
 
-bool IsPotentialComplexJunction(const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which>& connections) {
+bool IsPotentialComplexJunction(const std::unordered_map<Lane::Id, LaneEnd>& connections) {
   return connections.size() >= 2;
 }
 
-void AddLanesToCollectionOfSet(const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which>& connections,
+void AddLanesToCollectionOfSet(const std::unordered_map<Lane::Id, LaneEnd>& connections,
                                std::vector<std::unordered_set<std::string>>& sets) {
   // Verify if one of the connections is already added to a set. If so, then add the other connection to the same set.
   // Otherwise create a new set.
