@@ -65,7 +65,7 @@ class OSMManager {
   /// Gets the map's segments.
   const std::unordered_map<Segment::Id, Segment>& GetOSMSegments() const;
 
-  /// Gets connections among the map's lanes.
+  /// Gets connections between the map's lanes.
   const std::vector<osm::Connection>& GetOSMConnections() const;
 
  private:

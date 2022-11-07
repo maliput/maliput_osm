@@ -46,6 +46,8 @@ namespace builder {
 namespace test {
 namespace {
 
+using maliput::api::rules::Phase;
+
 class RoadNetworkBuilderTest : public ::testing::Test {
  public:
   void SetUp() override { ASSERT_NE(std::nullopt, builder_config_); }
@@ -109,6 +111,79 @@ TEST_P(RoadNetworkBuilderValidatorTest, RoadGeometryBuilding) {
 
 INSTANTIATE_TEST_CASE_P(RoadNetworkBuilderValidatorTestGroup, RoadNetworkBuilderValidatorTest,
                         ::testing::ValuesIn(InstantiateBuilderParameters()));
+
+// RoadNetworkBuilder constructs a RoadNetwork that holds:
+// - RoadGeometry
+// - RuleRegistry
+// - RoadRulebook
+// - TrafficLightBook
+// - PhaseRingBook
+// - IntersectionBook
+// Except the RoadGeometry, the rest of the entities can be loaded via a YAML descriptions provided at runtime.
+// This suite of tests guarantees that the RoadNetworkBuilder supports loading all the entities via YAML description.
+//
+// The map being used is loop_road_pedestrian_crosswalk.osm with its corresponding YAML description.
+class RoadNetworkBuilderPopulationTest : public ::testing::Test {
+ protected:
+  void SetUp() override {}
+
+  const std::string map_id{"loop_road_pedestrian_crosswalk"};
+  const std::string osm_file_path{utilities::FindOSMResource(map_id + ".osm")};
+  const std::string rule_registry_path{utilities::FindOSMResource(map_id + ".yaml")};
+  const std::string road_rulebook_path{utilities::FindOSMResource(map_id + ".yaml")};
+  const std::string traffic_light_book_path{utilities::FindOSMResource(map_id + ".yaml")};
+  const std::string phase_ring_book_path{utilities::FindOSMResource(map_id + ".yaml")};
+  const std::string intersection_book_path{utilities::FindOSMResource(map_id + ".yaml")};
+  const builder::BuilderConfiguration builder_config{builder::BuilderConfiguration::FromMap({
+      {config::kOsmFile, osm_file_path},
+      {config::kRuleRegistry, rule_registry_path},
+      {config::kRoadRuleBook, road_rulebook_path},
+      {config::kTrafficLightBook, traffic_light_book_path},
+      {config::kPhaseRingBook, phase_ring_book_path},
+      {config::kIntersectionBook, intersection_book_path},
+  })};
+};
+
+TEST_F(RoadNetworkBuilderPopulationTest, Builder) {
+  std::unique_ptr<maliput::api::RoadNetwork> dut;
+  ASSERT_NO_THROW(dut = builder::RoadNetworkBuilder(builder_config.ToStringMap())());
+
+  EXPECT_NE(nullptr, dut->road_geometry());
+
+  EXPECT_FALSE(dut->rule_registry()->DiscreteValueRuleTypes().empty());
+  EXPECT_FALSE(dut->rule_registry()->RangeValueRuleTypes().empty());
+
+  const auto rules = dut->rulebook()->Rules();
+  EXPECT_FALSE(rules.discrete_value_rules.empty());
+  EXPECT_FALSE(rules.range_value_rules.empty());
+  // New Rule API is being used therefore old rules aren't populated
+  EXPECT_TRUE(rules.direction_usage.empty());
+  EXPECT_TRUE(rules.speed_limit.empty());
+  EXPECT_TRUE(rules.right_of_way.empty());
+
+  // Traffic Light
+  const auto traffic_lights = dut->traffic_light_book()->TrafficLights();
+  EXPECT_EQ(4., static_cast<int>(traffic_lights.size()));
+
+  // Phase Ring book
+  const auto phase_rings = dut->phase_ring_book()->GetPhaseRings();
+  EXPECT_EQ(2., static_cast<int>(phase_rings.size()));
+  const auto phase_ring = dut->phase_ring_book()->GetPhaseRing(phase_rings[0]);
+  ASSERT_NE(std::nullopt, phase_ring);
+  const std::unordered_map<Phase::Id, Phase>& phases = phase_ring->phases();
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  // DiscreteValueRulesStates of any phases should be greater than zero while
+  // RuleStates should be zero.
+  EXPECT_TRUE(phases.begin()->second.rule_states().empty());
+#pragma GCC diagnostic pop
+  EXPECT_FALSE(phases.begin()->second.discrete_value_rule_states().empty());
+  ASSERT_NE(std::nullopt, phases.begin()->second.bulb_states());
+  EXPECT_FALSE(phases.begin()->second.bulb_states()->empty());
+
+  // Intersection book
+  EXPECT_EQ(2., static_cast<int>(dut->intersection_book()->GetIntersections().size()));
+}
 
 }  // namespace
 }  // namespace test

@@ -58,6 +58,16 @@ struct BuilderConfiguration {
   double scale_length{1.};
   /// Translation from maliput to maliput_osm inertial frame.
   maliput::math::Vector3 inertial_to_backend_frame_translation{};
+  /// Path to the configuration file to load a RuleRegistry
+  std::optional<std::string> rule_registry{std::nullopt};
+  /// Path to the configuration file to load a RoadRulebook
+  std::optional<std::string> road_rule_book{std::nullopt};
+  /// Path to the configuration file to load a TrafficLightBook.
+  std::optional<std::string> traffic_light_book{std::nullopt};
+  /// Path to the configuration file to load a PhaseRingBook.
+  std::optional<std::string> phase_ring_book{std::nullopt};
+  /// Path to the configuration file to load an IntersectionBook.
+  std::optional<std::string> intersection_book{std::nullopt};
 };
 
 }  // namespace builder

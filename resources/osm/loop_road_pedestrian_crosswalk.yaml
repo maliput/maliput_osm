@@ -56,10 +56,12 @@ RuleRegistry:
       severity: 0
       related_rules: [Yield Group, Vehicle-Stop-In-Zone-Behavior Rule Type]
       related_unique_ids: [Bulb Group]
-
-# Bear in mind that maliput_malidrive internally adds a couple of more rule types to handle rules that are obtained
-# from the xodr: speed limit, direction usage, vehicle usage, vehicle exclusive.
-
+  Speed-Limit Rule Type:
+    - range: [15, 30]
+      severity: 0
+      related_rules: [Yield Group]
+      related_unique_ids: [Bulb Group]
+      description: "Urban road. [m/s]"
 
 RoadRulebook:
   # WestToEast South
@@ -94,6 +96,18 @@ RoadRulebook:
           Vehicle-Stop-In-Zone-Behavior Rule Type: ["Vehicle-Stop-In-Zone-Behavior Rule Type/WestToEastSouth"]
         related_unique_ids:
         - Bulb Group: ["WestFacingSouth-WestFacingBulbsSouth"]
+  - id: "Speed-Limit Rule Type/WestToEastSouth"
+    type: "Speed-Limit Rule Type"
+    zone:
+      - lane_id: 1053
+    ranges:
+      - range: [15, 30]
+        severity: 0
+        related_rules:
+        - Yield Group: []
+        related_unique_ids:
+        - Bulb Group: []
+        description: "Urban road. [m/s]"
 
   # EastToWest South
   - id: "Vehicle-Stop-In-Zone-Behavior Rule Type/EastToWestSouth"
@@ -127,6 +141,18 @@ RoadRulebook:
           Vehicle-Stop-In-Zone-Behavior Rule Type: ["Vehicle-Stop-In-Zone-Behavior Rule Type/EastToWestSouth"]
         related_unique_ids:
         - Bulb Group: ["EastFacingSouth-EastFacingBulbsSouth"]
+  - id: "Speed-Limit Rule Type/EastToWestSouth"
+    type: "Speed-Limit Rule Type"
+    zone:
+      - lane_id: 1142
+    ranges:
+      - range: [15, 30]
+        severity: 0
+        related_rules:
+        - Yield Group: []
+        related_unique_ids:
+        - Bulb Group: []
+        description: "Urban road. [m/s]"
 
   # WestToEast North
   - id: "Vehicle-Stop-In-Zone-Behavior Rule Type/WestToEastNorth"
@@ -160,6 +186,18 @@ RoadRulebook:
           Vehicle-Stop-In-Zone-Behavior Rule Type: ["Vehicle-Stop-In-Zone-Behavior Rule Type/WestToEastNorth"]
         related_unique_ids:
         - Bulb Group: ["WestFacingNorth-WestFacingBulbsNorth"]
+  - id: "Speed-Limit Rule Type/WestFacingBulbsNorth"
+    type: "Speed-Limit Rule Type"
+    zone:
+      - lane_id: 1414
+    ranges:
+      - range: [15, 30]
+        severity: 0
+        related_rules:
+        - Yield Group: []
+        related_unique_ids:
+        - Bulb Group: []
+        description: "Urban road. [m/s]"
 
   # EastToWest North
   - id: "Vehicle-Stop-In-Zone-Behavior Rule Type/EastToWestNorth"
@@ -193,6 +231,18 @@ RoadRulebook:
           Vehicle-Stop-In-Zone-Behavior Rule Type: ["Vehicle-Stop-In-Zone-Behavior Rule Type/EastToWestNorth"]
         related_unique_ids:
         - Bulb Group: ["EastFacingNorth-EastFacingBulbsNorth"]
+  - id: "Speed-Limit Rule Type/EastToWestNorth"
+    type: "Speed-Limit Rule Type"
+    zone:
+      - lane_id: 1449
+    ranges:
+      - range: [15, 30]
+        severity: 0
+        related_rules:
+        - Yield Group: []
+        related_unique_ids:
+        - Bulb Group: []
+        description: "Urban road. [m/s]"
 
 TrafficLights:
 - ID: WestFacingSouth

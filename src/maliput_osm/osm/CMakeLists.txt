@@ -4,6 +4,7 @@
 add_library(osm
   connection.cc
   conversions.cc
+  lane.cc
   osm_manager.cc
 )
 add_library(maliput_osm::osm ALIAS osm)

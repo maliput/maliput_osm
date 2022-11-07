@@ -33,6 +33,20 @@
 
 namespace maliput_osm {
 namespace builder {
+namespace {
+
+maliput::api::LaneEnd::Which ToMaliputLaneEndWhich(const osm::LaneEnd::Which end) {
+  switch (end) {
+    case osm::LaneEnd::Which::kStart:
+      return maliput::api::LaneEnd::Which::kStart;
+    case osm::LaneEnd::Which::kFinish:
+      return maliput::api::LaneEnd::Which::kFinish;
+    default:
+      MALIPUT_THROW_MESSAGE("Unknown osm::LaneEnd::Which value: " + static_cast<int>(end));
+  }
+}
+
+}  // namespace
 
 RoadGeometryBuilder::RoadGeometryBuilder(std::unique_ptr<osm::OSMManager> osm_manager,
                                          const BuilderConfiguration& builder_configuration)
@@ -72,8 +86,8 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
   }
   maliput_sparse::builder::BranchPointBuilder bp_builder = rg_builder.StartBranchPoints();
   for (const auto& connection : connections) {
-    bp_builder.Connect(maliput::api::LaneId{connection.from_id}, connection.from_end,
-                       maliput::api::LaneId{connection.to_id}, connection.to_end);
+    bp_builder.Connect(maliput::api::LaneId{connection.from.lane_id}, ToMaliputLaneEndWhich(connection.from.end),
+                       maliput::api::LaneId{connection.to.lane_id}, ToMaliputLaneEndWhich(connection.to.end));
   }
   bp_builder.EndBranchPoints();
 
