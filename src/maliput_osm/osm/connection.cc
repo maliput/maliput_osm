@@ -33,8 +33,7 @@ namespace maliput_osm {
 namespace osm {
 
 bool Connection::operator==(const Connection& other) const {
-  return ((from_id == other.from_id && to_id == other.to_id && from_end == other.from_end && to_end == other.to_end) ||
-          (from_id == other.to_id && to_id == other.from_id && from_end == other.to_end && to_end == other.from_end));
+  return ((from == other.from && to == other.to) || (from == other.to && to == other.from));
 }
 
 }  // namespace osm

@@ -40,7 +40,7 @@ namespace osm {
 namespace {
 
 // @param[out] connections
-void AddToConnections(const Connection& connection, std::vector<osm::Connection>* connections) {
+void AddToConnections(const Connection& connection, std::vector<Connection>* connections) {
   MALIPUT_THROW_UNLESS(connections);
   if (std::find(connections->begin(), connections->end(), connection) == connections->end()) {
     connections->push_back(connection);
@@ -72,11 +72,11 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
   for (const auto& segment : segments_) {
     for (const auto& lane : segment.second.lanes) {
       for (const auto& predecessor : lane.predecessors) {
-        const Connection connection{predecessor.first, predecessor.second, lane.id, maliput::api::LaneEnd::kStart};
+        const Connection connection{predecessor.second, {lane.id, LaneEnd::Which::kStart}};
         AddToConnections(connection, &connections_);
       }
       for (const auto& successor : lane.successors) {
-        const Connection connection{lane.id, maliput::api::LaneEnd::kFinish, successor.first, successor.second};
+        const Connection connection{{lane.id, LaneEnd::Which::kFinish}, successor.second};
         AddToConnections(connection, &connections_);
       }
     }

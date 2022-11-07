@@ -47,8 +47,6 @@ namespace osm {
 namespace test {
 namespace {
 
-using maliput::api::LaneEnd;
-
 static constexpr double kTolerance{1e-6};
 
 TEST(ToMaliput, LineString) {
@@ -171,9 +169,8 @@ class LShapeRoadMapToMaliputPredecessorSuccessorTest : public testing::Test {
 TEST_F(LShapeRoadMapToMaliputPredecessorSuccessorTest, StartLane) {
   constexpr int kLaneIdNumber{1206};
   const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
-  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_successors{
-      {"1335", LaneEnd::Which::kStart}};
-  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_predecessors{};
+  const std::unordered_map<Lane::Id, LaneEnd> expected_successors{{"1335", {"1335", LaneEnd::Which::kStart}}};
+  const std::unordered_map<Lane::Id, LaneEnd> expected_predecessors{};
 
   const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
   ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
@@ -186,10 +183,8 @@ TEST_F(LShapeRoadMapToMaliputPredecessorSuccessorTest, StartLane) {
 TEST_F(LShapeRoadMapToMaliputPredecessorSuccessorTest, MiddleLane) {
   constexpr int kLaneIdNumber{1335};
   const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
-  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_successors{
-      {"1542", LaneEnd::Which::kStart}};
-  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_predecessors{
-      {"1206", LaneEnd::Which::kFinish}};
+  const std::unordered_map<Lane::Id, LaneEnd> expected_successors{{"1542", {"1542", LaneEnd::Which::kStart}}};
+  const std::unordered_map<Lane::Id, LaneEnd> expected_predecessors{{"1206", {"1206", LaneEnd::Which::kFinish}}};
 
   const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
   ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
@@ -202,9 +197,8 @@ TEST_F(LShapeRoadMapToMaliputPredecessorSuccessorTest, MiddleLane) {
 TEST_F(LShapeRoadMapToMaliputPredecessorSuccessorTest, EndLane) {
   constexpr int kLaneIdNumber{1542};
   const Lane::Id lane_id{std::to_string(kLaneIdNumber)};
-  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_successors{};
-  const std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> expected_predecessors{
-      {"1335", LaneEnd::Which::kFinish}};
+  const std::unordered_map<Lane::Id, LaneEnd> expected_successors{};
+  const std::unordered_map<Lane::Id, LaneEnd> expected_predecessors{{"1335", {"1335", LaneEnd::Which::kFinish}}};
 
   const auto lanelet = lanelet_map_->laneletLayer.find(lanelet::Id{kLaneIdNumber});
   ASSERT_NE(lanelet, lanelet_map_->laneletLayer.end());
@@ -218,8 +212,8 @@ struct AdjacentPredecessorSuccessorTest {
   int id;
   std::optional<Lane::Id> left_lane_id;
   std::optional<Lane::Id> right_lane_id;
-  std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> predecessors;
-  std::unordered_map<Lane::Id, maliput::api::LaneEnd::Which> successors;
+  std::unordered_map<Lane::Id, LaneEnd> predecessors;
+  std::unordered_map<Lane::Id, LaneEnd> successors;
 };
 
 std::vector<AdjacentPredecessorSuccessorTest> GetAdjacentPredecessorSuccessorTest() {
@@ -229,62 +223,62 @@ std::vector<AdjacentPredecessorSuccessorTest> GetAdjacentPredecessorSuccessorTes
           {} /* left_lane */,
           "23" /* right_lane */,
           {} /* predecessors */,
-          {{"56", LaneEnd::Which::kStart}} /* successors */,
+          {{"56", {"56", LaneEnd::Which::kStart}}} /* successors */,
       },
       {
           23,
           "12" /* left_lane */,
           "34" /* right_lane */,
           {} /* predecessors */,
-          {{"67", LaneEnd::Which::kStart}} /* successors */,
+          {{"67", {"67", LaneEnd::Which::kStart}}} /* successors */,
       },
       {
           34,
           "23" /* left_lane */,
           {} /* right_lane */,
           {} /* predecessors */,
-          {{"78", LaneEnd::Which::kStart}} /* successors */,
+          {{"78", {"78", LaneEnd::Which::kStart}}} /* successors */,
       },
       {
           56,
           {} /* left_lane */,
           "67" /* right_lane */,
-          {{"12", LaneEnd::Which::kFinish}} /* predecessors */,
+          {{"12", {"12", LaneEnd::Which::kFinish}}} /* predecessors */,
           {} /* successors */,
       },
       {
           67,
           "56" /* left_lane */,
           "78" /* right_lane */,
-          {{"23", LaneEnd::Which::kFinish}} /* predecessors */,
-          {{"910", LaneEnd::Which::kStart}} /* successors */,
+          {{"23", {"23", LaneEnd::Which::kFinish}}} /* predecessors */,
+          {{"910", {"910", LaneEnd::Which::kStart}}} /* successors */,
       },
       {
           78,
           "67" /* left_lane */,
           {} /* right_lane */,
-          {{"34", LaneEnd::Which::kFinish}} /* predecessors */,
+          {{"34", {"34", LaneEnd::Which::kFinish}}} /* predecessors */,
           {} /* successors */,
       },
       {
           910,
           {} /* left_lane */,
           {} /* right_lane */,
-          {{"67", LaneEnd::Which::kFinish}} /* predecessors */,
-          {{"1112", LaneEnd::Which::kStart}, {"1314", LaneEnd::Which::kStart}} /* successors */,
+          {{"67", {"67", LaneEnd::Which::kFinish}}} /* predecessors */,
+          {{"1112", {"1112", LaneEnd::Which::kStart}}, {"1314", {"1314", LaneEnd::Which::kStart}}} /* successors */,
       },
       {
           1112,
           {} /* left_lane */,
           {} /* right_lane */,
-          {{"910", LaneEnd::Which::kFinish}, {"1314", LaneEnd::Which::kStart}} /* predecessors */,
+          {{"910", {"910", LaneEnd::Which::kFinish}}, {"1314", {"1314", LaneEnd::Which::kStart}}} /* predecessors */,
           {} /* successors */,
       },
       {
           1314,
           {} /* left_lane */,
           {} /* right_lane */,
-          {{"910", LaneEnd::Which::kFinish}, {"1112", LaneEnd::Which::kStart}} /* predecessors */,
+          {{"910", {"910", LaneEnd::Which::kFinish}}, {"1112", {"1112", LaneEnd::Which::kStart}}} /* predecessors */,
           {} /* successors */,
       },
   };
@@ -318,62 +312,62 @@ std::vector<AdjacentPredecessorSuccessorTest> GetAdjacentPredecessorSuccessorWit
           {} /* left_lane */,
           "23" /* right_lane */,
           {} /* predecessors */,
-          {{"65", LaneEnd::Which::kFinish}} /* successors */,
+          {{"65", {"65", LaneEnd::Which::kFinish}}} /* successors */,
       },
       {
           23,
           "12" /* left_lane */,
           "34" /* right_lane */,
           {} /* predecessors */,
-          {{"76", LaneEnd::Which::kFinish}} /* successors */,
+          {{"76", {"76", LaneEnd::Which::kFinish}}} /* successors */,
       },
       {
           34,
           "23" /* left_lane */,
           {} /* right_lane */,
           {} /* predecessors */,
-          {{"87", LaneEnd::Which::kFinish}} /* successors */,
+          {{"87", {"87", LaneEnd::Which::kFinish}}} /* successors */,
       },
       {
           65,
           "76" /* left_lane */,
           {} /* right_lane */,
-          {{"910", LaneEnd::Which::kStart}} /* predecessors */,
-          {{"12", LaneEnd::Which::kFinish}} /* successors */,
+          {{"910", {"910", LaneEnd::Which::kStart}}} /* predecessors */,
+          {{"12", {"12", LaneEnd::Which::kFinish}}} /* successors */,
       },
       {
           76,
           "87" /* left_lane */,
           "65" /* right_lane */,
-          {{"1011", LaneEnd::Which::kStart}} /* predecessors */,
-          {{"23", LaneEnd::Which::kFinish}} /* successors */,
+          {{"1011", {"1011", LaneEnd::Which::kStart}}} /* predecessors */,
+          {{"23", {"23", LaneEnd::Which::kFinish}}} /* successors */,
       },
       {
           87,
           {} /* left_lane */,
           "76" /* right_lane */,
-          {{"1112", LaneEnd::Which::kStart}} /* predecessors */,
-          {{"34", LaneEnd::Which::kFinish}} /* successors */,
+          {{"1112", {"1112", LaneEnd::Which::kStart}}} /* predecessors */,
+          {{"34", {"34", LaneEnd::Which::kFinish}}} /* successors */,
       },
       {
           910,
           {} /* left_lane */,
           "1011" /* right_lane */,
-          {{"65", LaneEnd::Which::kStart}} /* predecessors */,
+          {{"65", {"65", LaneEnd::Which::kStart}}} /* predecessors */,
           {} /* successors */,
       },
       {
           1011,
           "910" /* left_lane */,
           "1112" /* right_lane */,
-          {{"76", LaneEnd::Which::kStart}} /* predecessors */,
+          {{"76", {"76", LaneEnd::Which::kStart}}} /* predecessors */,
           {} /* successors */,
       },
       {
           1112,
           "1011" /* left_lane */,
           {} /* right_lane */,
-          {{"87", LaneEnd::Which::kStart}} /* predecessors */,
+          {{"87", {"87", LaneEnd::Which::kStart}}} /* predecessors */,
           {} /* successors */,
       },
   };
