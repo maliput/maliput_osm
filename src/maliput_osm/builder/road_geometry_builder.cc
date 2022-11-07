@@ -33,6 +33,20 @@
 
 namespace maliput_osm {
 namespace builder {
+namespace {
+
+maliput::api::LaneEnd::Which ToMaliputLaneEndWhich(const osm::LaneEnd::Which end) {
+  switch (end) {
+    case osm::LaneEnd::Which::kStart:
+      return maliput::api::LaneEnd::Which::kStart;
+    case osm::LaneEnd::Which::kFinish:
+      return maliput::api::LaneEnd::Which::kFinish;
+    default:
+      MALIPUT_THROW_MESSAGE("Unknown osm::LaneEnd::Which value: " + static_cast<int>(end));
+  }
+}
+
+}  // namespace
 
 RoadGeometryBuilder::RoadGeometryBuilder(std::unique_ptr<osm::OSMManager> osm_manager,
                                          const BuilderConfiguration& builder_configuration)
@@ -42,6 +56,7 @@ RoadGeometryBuilder::RoadGeometryBuilder(std::unique_ptr<osm::OSMManager> osm_ma
 
 std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator()() {
   const std::unordered_map<osm::Segment::Id, osm::Segment>& osm_segments = osm_manager_->GetOSMSegments();
+  const std::vector<osm::Connection>& connections = osm_manager_->GetOSMConnections();
 
   maliput_sparse::builder::RoadGeometryBuilder rg_builder{};
   rg_builder.Id(builder_configuration_.road_geometry_id)
@@ -57,8 +72,9 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
     segment_builder.Id(maliput::api::SegmentId{osm_segment.first});
 
     for (const osm::Lane& osm_lane : osm_segment.second.lanes) {
+      const maliput::api::LaneId lane_id{osm_lane.id};
       segment_builder.StartLane()
-          .Id(maliput::api::LaneId{osm_lane.id})
+          .Id(lane_id)
           .HeightBounds(maliput::api::HBounds{0., 5.})
           .StartLaneGeometry()
           .LeftLineString(osm_lane.left)
@@ -68,8 +84,14 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
     }
     segment_builder.EndSegment().EndJunction();
   }
-  // TODO(#18): Build branchpoints.
-  return rg_builder.StartBranchPoints().EndBranchPoints().Build();
+  maliput_sparse::builder::BranchPointBuilder bp_builder = rg_builder.StartBranchPoints();
+  for (const auto& connection : connections) {
+    bp_builder.Connect(maliput::api::LaneId{connection.from.lane_id}, ToMaliputLaneEndWhich(connection.from.end),
+                       maliput::api::LaneId{connection.to.lane_id}, ToMaliputLaneEndWhich(connection.to.end));
+  }
+  bp_builder.EndBranchPoints();
+
+  return rg_builder.Build();
 }
 
 }  // namespace builder

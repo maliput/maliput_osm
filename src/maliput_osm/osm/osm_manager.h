@@ -35,6 +35,7 @@
 
 #include <maliput/common/maliput_copyable.h>
 
+#include "maliput_osm/osm/connection.h"
 #include "maliput_osm/osm/lane.h"
 #include "maliput_osm/osm/segment.h"
 #include "utilities/id_gen.h"
@@ -63,6 +64,9 @@ class OSMManager {
 
   /// Gets the map's segments.
   const std::unordered_map<Segment::Id, Segment>& GetOSMSegments() const;
+
+  /// Gets connections between the map's lanes.
+  const std::vector<osm::Connection>& GetOSMConnections() const;
 
  private:
   // Convenient definitions for the AddLanesToSegment method's left parameter.
@@ -94,8 +98,14 @@ class OSMManager {
   // Id generator for the segments.
   utilities::IdGen<Segment::Id> segment_id_gen_;
 
+  // Id generator for the junctions.
+  utilities::IdGen<std::string> junction_id_gen_;
+
   // Collection of segments.
   std::unordered_map<Segment::Id, Segment> segments_{};
+
+  // Collection of connections;
+  std::vector<osm::Connection> connections_{};
 };
 
 }  // namespace osm

@@ -37,7 +37,17 @@
 
 namespace maliput_osm {
 namespace osm {
+namespace {
 
+// @param[out] connections
+void AddToConnections(const Connection& connection, std::vector<Connection>* connections) {
+  MALIPUT_THROW_UNLESS(connections);
+  if (std::find(connections->begin(), connections->end(), connection) == connections->end()) {
+    connections->push_back(connection);
+  }
+}
+
+}  // namespace
 OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& config) {
   using namespace lanelet;
   const LaneletMapPtr map = load(osm_file_path, Origin{GPSPoint{config.origin.x(), config.origin.y()}});
@@ -57,11 +67,27 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
     }
     segments_.emplace(segment->id, std::move(segment.value()));
   }
+
+  // Fill up connections.
+  for (const auto& segment : segments_) {
+    for (const auto& lane : segment.second.lanes) {
+      for (const auto& predecessor : lane.predecessors) {
+        const Connection connection{predecessor.second, {lane.id, LaneEnd::Which::kStart}};
+        AddToConnections(connection, &connections_);
+      }
+      for (const auto& successor : lane.successors) {
+        const Connection connection{{lane.id, LaneEnd::Which::kFinish}, successor.second};
+        AddToConnections(connection, &connections_);
+      }
+    }
+  }
 }
 
 OSMManager::~OSMManager() = default;
 
 const std::unordered_map<Segment::Id, Segment>& OSMManager::GetOSMSegments() const { return segments_; }
+
+const std::vector<osm::Connection>& OSMManager::GetOSMConnections() const { return connections_; }
 
 std::optional<Segment> OSMManager::CreateSegmentForLane(const Lane& lane,
                                                         const std::unordered_map<Lane::Id, Lane>& lanes) {

@@ -2,8 +2,10 @@
 # osm
 ##############################################################################
 add_library(osm
-  osm_manager.cc
+  connection.cc
   conversions.cc
+  lane.cc
+  osm_manager.cc
 )
 add_library(maliput_osm::osm ALIAS osm)
 set_target_properties(osm
