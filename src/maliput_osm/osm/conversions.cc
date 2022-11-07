@@ -30,6 +30,7 @@
 #include "maliput_osm/osm/conversions.h"
 
 #include <algorithm>
+#include <cmath>
 #include <optional>
 #include <string>
 #include <unordered_set>
@@ -151,7 +152,8 @@ std::unordered_map<Lane::Id, LaneEnd> FilterOutByDirection(const lanelet::Lanele
   const maliput::math::Vector2 tangent_at_end = Get2DTangentAtLaneEnd(lanelet, lane_end_which);
   std::unordered_map<Lane::Id, LaneEnd> filtered_connections;
   for (const auto& [connected_lanelet_id, connected_end_which] : connections) {
-    const auto connected_lanelet = lanelet_layer.find(lanelet::Id(std::stoul(connected_lanelet_id)));
+    const auto to_lanelet_id = [](const std::string& id) { return lanelet::Id{std::stol(id)}; };
+    const auto connected_lanelet = lanelet_layer.find(to_lanelet_id(connected_lanelet_id));
     MALIPUT_THROW_UNLESS(connected_lanelet != lanelet_layer.end());
     const maliput::math::Vector2 connected_tangent_at_end =
         Get2DTangentAtLaneEnd(*connected_lanelet, connected_end_which.end);
@@ -159,7 +161,7 @@ std::unordered_map<Lane::Id, LaneEnd> FilterOutByDirection(const lanelet::Lanele
     const bool aligned = AreLaneEndsAligned(lane_end_which, connected_end_which.end);
     const double angle = GetDiffAngle(tangent_at_end, connected_tangent_at_end * (aligned ? 1. : -1.));
 
-    if (angle < M_PI_2) {
+    if (std::abs(angle) < M_PI_2) {
       filtered_connections.insert({connected_lanelet_id, LaneEnd{connected_lanelet_id, connected_end_which.end}});
     }
   }
@@ -227,20 +229,15 @@ Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletMapPtr& ma
   };
 
   // Filter out the lane ids of lanelets that approach the points from an off direction.
-  const auto predecessor_lanelets = find_usage_of_end_points(lanelet.leftBound().front(), lanelet.rightBound().front());
-  const auto successor_lanelets = find_usage_of_end_points(lanelet.leftBound().back(), lanelet.rightBound().back());
-  const auto filtered_predecessor_lanelets =
-      FilterOutByDirection(lanelet, LaneEnd::Which::kStart, predecessor_lanelets, *map_layer);
-  const auto filtered_successor_lanelets =
-      FilterOutByDirection(lanelet, LaneEnd::Which::kFinish, successor_lanelets, *map_layer);
+  const auto predecessor_lanelets = FilterOutByDirection(
+      lanelet, LaneEnd::Which::kStart,
+      find_usage_of_end_points(lanelet.leftBound().front(), lanelet.rightBound().front()) /* predecessors */,
+      *map_layer);
+  const auto successor_lanelets = FilterOutByDirection(
+      lanelet, LaneEnd::Which::kFinish,
+      find_usage_of_end_points(lanelet.leftBound().back(), lanelet.rightBound().back()) /* successors */, *map_layer);
 
-  return {id,
-          left_bound,
-          right_bound,
-          left_lane_id,
-          right_lane_id,
-          filtered_successor_lanelets,
-          filtered_predecessor_lanelets};
+  return {id, left_bound, right_bound, left_lane_id, right_lane_id, successor_lanelets, predecessor_lanelets};
 }
 
 }  // namespace osm
