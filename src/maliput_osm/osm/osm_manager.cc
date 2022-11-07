@@ -52,19 +52,20 @@ bool IsPotentialComplexJunction(const std::unordered_map<Lane::Id, LaneEnd>& con
 }
 
 void AddLanesToCollectionOfSet(const std::unordered_map<Lane::Id, LaneEnd>& connections,
-                               std::vector<std::unordered_set<std::string>>& sets) {
+                               std::vector<std::unordered_set<std::string>>* sets) {
+  MALIPUT_THROW_UNLESS(sets);
   // Verify if one of the connections is already added to a set. If so, then add the other connection to the same set.
   // Otherwise create a new set.
-  std::vector<std::unordered_set<std::string>>::iterator set_it = sets.end();
+  std::vector<std::unordered_set<std::string>>::iterator set_it = sets->end();
   for (const auto& connection : connections) {
-    set_it = std::find_if(sets.begin(), sets.end(), [&connection](const std::unordered_set<std::string>& set) {
+    set_it = std::find_if(sets->begin(), sets->end(), [&connection](const std::unordered_set<std::string>& set) {
       return set.find(connection.first) != set.end();
     });
   };
   for (const auto& connection : connections) {
-    if (set_it == sets.end()) {
-      sets.push_back({connection.first});
-      set_it = sets.end() - 1;
+    if (set_it == sets->end()) {
+      sets->push_back({connection.first});
+      set_it = sets->end() - 1;
     } else {
       set_it->emplace(connection.first);
     }
@@ -125,34 +126,30 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
   // Group lanes that belong to a complex junction.
   for (const auto& segment : segments) {
     for (const auto& lane : segment.second.lanes) {
-      const bool complex_junction_in_predecessor = IsPotentialComplexJunction(lane.predecessors);
-      const bool complex_junction_in_successor = IsPotentialComplexJunction(lane.successors);
-
-      if (complex_junction_in_predecessor) {
+      if (IsPotentialComplexJunction(lane.predecessors)) {
         // check the lanes in the predecessor and add them to the potential_junction_lanes_set
-        AddLanesToCollectionOfSet(lane.predecessors, potential_junction_lanes_set);
+        AddLanesToCollectionOfSet(lane.predecessors, &potential_junction_lanes_set);
       }
-      if (complex_junction_in_successor) {
+      if (IsPotentialComplexJunction(lane.successors)) {
         // check the lanes in the successor and add them to the potential_junction_lanes_set
-        AddLanesToCollectionOfSet(lane.successors, potential_junction_lanes_set);
+        AddLanesToCollectionOfSet(lane.successors, &potential_junction_lanes_set);
       }
     }
   }
 
-  // Create junctions for complex connections
+  // Create junctions for complex connections.
   for (const auto& set : potential_junction_lanes_set) {
     Junction junction;
     Junction::Id junction_id{""};
-    MALIPUT_THROW_UNLESS(!set.empty());
     for (const auto& lane_id : set) {
-      const std::pair<Segment::Id, Segment> segment_id = FindSegmentForLane(lane_id, segments);  // TODO this method.
-      junction.segments.emplace(segment_id);
-      junction.id = junction.id + (junction.id.empty() ? "" : "_") + segment_id.first;
+      const std::pair<Segment::Id, Segment> id_segment = FindSegmentForLane(lane_id, segments);  // TODO this method.
+      junction.segments.emplace(id_segment);
+      junction.id = junction.id + (junction.id.empty() ? "" : "_") + id_segment.first;
     }
     junctions_.insert({junction.id, junction});
   }
 
-  // Create junctions for the rest of the segments
+  // Create junctions for the rest of the segments.
   for (const auto& segment : segments) {
     if (std::find_if(junctions_.begin(), junctions_.end(),
                      [&segment](const std::pair<Junction::Id, Junction>& junction) {

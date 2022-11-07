@@ -94,6 +94,7 @@ class OSMManager {
   // When a lane already belongs to a segment then no segment is created and std::nullopt is returned.
   // @param lane The lane to create a Segment from.
   // @param lanes The map of all lanes.
+  // @param segments The map of all segments to verify if @p lane already belongs to a segment.
   // @returns A populated Segment or std::nullopt when the lane already belongs to a segment.
   std::optional<Segment> CreateSegmentForLane(const Lane& lane, const std::unordered_map<Lane::Id, Lane>& lanes,
                                               const std::unordered_map<Segment::Id, Segment>& segments);
