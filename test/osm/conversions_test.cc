@@ -271,14 +271,14 @@ std::vector<AdjacentPredecessorSuccessorTest> GetAdjacentPredecessorSuccessorTes
           1112,
           {} /* left_lane */,
           {} /* right_lane */,
-          {{"910", {"910", LaneEnd::Which::kFinish}}, {"1314", {"1314", LaneEnd::Which::kStart}}} /* predecessors */,
+          {{"910", {"910", LaneEnd::Which::kFinish}}} /* predecessors */,
           {} /* successors */,
       },
       {
           1314,
           {} /* left_lane */,
           {} /* right_lane */,
-          {{"910", {"910", LaneEnd::Which::kFinish}}, {"1112", {"1112", LaneEnd::Which::kStart}}} /* predecessors */,
+          {{"910", {"910", LaneEnd::Which::kFinish}}} /* predecessors */,
           {} /* successors */,
       },
   };
