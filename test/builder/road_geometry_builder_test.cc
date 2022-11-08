@@ -111,6 +111,20 @@ std::vector<RoadGeometryBuilderTestParameters> InstantiateBuilderParameters() {
            {JunctionId("3"), {{{SegmentId("3")}, {LaneId("1214")}}}},
            {JunctionId("4"), {{{SegmentId("4")}, {LaneId("1336")}}}},
        }},
+      {"t_shape_road.osm",
+       "t_shape_road",
+       {
+           {JunctionId("8_4_1_0_7_5"),
+            {{{SegmentId("8")}, {LaneId("2053")}},
+             {{SegmentId("4")}, {LaneId("1641")}},
+             {{SegmentId("1")}, {LaneId("1968")}},
+             {{SegmentId("0")}, {LaneId("1604")}},
+             {{SegmentId("7")}, {LaneId("2032")}},
+             {{SegmentId("5")}, {LaneId("1989")}}}},
+           {JunctionId("2"), {{{SegmentId("2")}, {LaneId("1472"), LaneId("1567")}}}},
+           {JunctionId("3"), {{{SegmentId("3")}, {LaneId("1188"), LaneId("1283")}}}},
+           {JunctionId("6"), {{{SegmentId("6")}, {LaneId("1830"), LaneId("1925")}}}},
+       }},
   };
 }
 
