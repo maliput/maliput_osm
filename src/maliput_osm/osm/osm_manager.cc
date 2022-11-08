@@ -83,6 +83,32 @@ std::pair<Segment::Id, Segment> FindSegmentForLane(const Lane::Id& lane_id,
   return *segment_it;
 }
 
+// Join the sets that share a common segment.
+void JoinSetsIfSharedValues(std::vector<std::unordered_set<std::string>>* sets) {
+  auto join_sets = [](std::vector<std::unordered_set<std::string>>* sets) {
+    bool joined = false;
+    for (auto& set : *sets) {
+      auto set_it = std::find_if(sets->begin(), sets->end(), [&set](const std::unordered_set<std::string>& s) {
+        return std::find_if(set.begin(), set.end(),
+                            [&s](const std::string& value) { return s.find(value) != s.end(); }) != set.end();
+      });
+      if (set_it != sets->end() && (*set_it != set)) {
+        set.insert(set_it->begin(), set_it->end());
+        set_it->clear();
+        joined = true;
+      }
+    }
+    // Remove empty sets.
+    sets->erase(std::remove_if(sets->begin(), sets->end(),
+                               [](const std::unordered_set<std::string>& set) { return set.empty(); }),
+                sets->end());
+    return joined;
+  };
+
+  while (join_sets(sets)) {
+  }
+}
+
 }  // namespace
 
 OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& config) {
@@ -136,6 +162,9 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
       }
     }
   }
+
+  // Join the potential junctions that share segments.
+  JoinSetsIfSharedValues(&potential_junction_lanes_set);
 
   // Create junctions for complex connections.
   for (const auto& set : potential_junction_lanes_set) {
