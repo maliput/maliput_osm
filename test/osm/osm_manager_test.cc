@@ -50,26 +50,28 @@ namespace {
 
 struct OSMManagerTestCase {
   std::string osm_file;
-  std::unordered_map<Segment::Id, Segment> segments;
+  std::unordered_map<Junction::Id, Junction> junctions;
 };
 
 std::vector<OSMManagerTestCase> OSMManagerTestCases() {
   return {
       {"straight_forward.osm",
-       {{Segment::Id{"0"},
-         {Segment::Id{"0"},
-          {
-              {Lane::Id{"1010"},
-               LineString3d{{0., -500., 0.}, {0., 500., 0.}},
-               LineString3d{{3.5, -500., 0.}, {3.5, 500., 0.}},
-               {std::make_optional<Lane::Id>("1006")},
-               std::nullopt},
-              {Lane::Id{"1006"},
-               LineString3d{{-3.5, -500., 0.}, {-3.5, 500., 0.}},
-               LineString3d{{0., -500., 0.}, {0., 500., 0.}},
-               std::nullopt,
-               {std::make_optional<Lane::Id>("1010")}},
-          }}}}},
+       {{Junction::Id{"0"},
+         {Junction::Id{"0"},
+          {{Segment::Id{"0"},
+            {Segment::Id{"0"},
+             {
+                 {Lane::Id{"1010"},
+                  LineString3d{{0., -500., 0.}, {0., 500., 0.}},
+                  LineString3d{{3.5, -500., 0.}, {3.5, 500., 0.}},
+                  {std::make_optional<Lane::Id>("1006")},
+                  std::nullopt},
+                 {Lane::Id{"1006"},
+                  LineString3d{{-3.5, -500., 0.}, {-3.5, 500., 0.}},
+                  LineString3d{{0., -500., 0.}, {0., 500., 0.}},
+                  std::nullopt,
+                  {std::make_optional<Lane::Id>("1010")}},
+             }}}}}}}},
   };
 }
 
@@ -82,13 +84,16 @@ class OSMMangerTest : public ::testing::TestWithParam<OSMManagerTestCase> {
 
 TEST_P(OSMMangerTest, Test) {
   const OSMManager dut{kOSMFilePath, kParserConfig};
-  const auto osm_segments = dut.GetOSMSegments();
-  EXPECT_EQ(case_.segments.size(), osm_segments.size());
+  const auto osm_junctions = dut.GetOSMJunctions();
+  EXPECT_EQ(case_.junctions.size(), osm_junctions.size());
 
-  for (const auto& case_segment : case_.segments) {
-    const auto it = osm_segments.find(case_segment.first);
-    ASSERT_TRUE(it != osm_segments.end());
-    EXPECT_TRUE(CompareOSMSegment(case_segment.second, it->second, 1e-5));
+  for (const auto& osm_junction : osm_junctions) {
+    EXPECT_EQ(case_.junctions.at(osm_junction.first).segments.size(), osm_junction.second.segments.size());
+    for (const auto& case_segment : case_.junctions.at(osm_junction.first).segments) {
+      const auto it = osm_junction.second.segments.find(case_segment.first);
+      ASSERT_TRUE(it != osm_junction.second.segments.end());
+      EXPECT_TRUE(CompareOSMSegment(case_segment.second, it->second, 1e-5));
+    }
   }
 }
 

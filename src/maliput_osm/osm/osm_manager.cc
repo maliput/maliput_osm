@@ -47,7 +47,72 @@ void AddToConnections(const Connection& connection, std::vector<Connection>* con
   }
 }
 
+bool IsPotentialComplexJunction(const std::unordered_map<Lane::Id, LaneEnd>& connections) {
+  return connections.size() >= 2;
+}
+
+void AddLanesToCollectionOfSet(const std::unordered_map<Lane::Id, LaneEnd>& connections,
+                               std::vector<std::unordered_set<std::string>>* sets) {
+  MALIPUT_THROW_UNLESS(sets);
+  // Verify if one of the connections is already added to a set. If so, then add the other connection to the same set.
+  // Otherwise create a new set.
+  std::vector<std::unordered_set<std::string>>::iterator set_it = sets->end();
+  for (const auto& connection : connections) {
+    set_it = std::find_if(sets->begin(), sets->end(), [&connection](const std::unordered_set<std::string>& set) {
+      return set.find(connection.first) != set.end();
+    });
+  };
+  for (const auto& connection : connections) {
+    if (set_it == sets->end()) {
+      sets->push_back({connection.first});
+      set_it = sets->end() - 1;
+    } else {
+      set_it->emplace(connection.first);
+    }
+  }
+}
+
+// Given a lane find the segment that contains it.
+std::pair<Segment::Id, Segment> FindSegmentForLane(const Lane::Id& lane_id,
+                                                   const std::unordered_map<Segment::Id, Segment>& segments) {
+  const auto segment_it =
+      std::find_if(segments.begin(), segments.end(), [&lane_id](const std::pair<Segment::Id, Segment>& segment) {
+        return std::find_if(segment.second.lanes.begin(), segment.second.lanes.end(),
+                            [&lane_id](const auto& lane) { return lane.id == lane_id; }) != segment.second.lanes.end();
+      });
+  return *segment_it;
+}
+
+// Join the sets that share a common segment.
+void JoinSetsIfSharedValues(std::vector<std::unordered_set<std::string>>* sets) {
+  auto join_sets = [](std::vector<std::unordered_set<std::string>>* sets) {
+    bool joined = false;
+    for (auto& set : *sets) {
+      auto set_it = std::find_if(sets->begin(), sets->end(), [&set](const std::unordered_set<std::string>& s) {
+        return std::find_if(set.begin(), set.end(),
+                            [&s](const std::string& value) { return s.find(value) != s.end(); }) != set.end();
+      });
+      if (set_it != sets->end() && (*set_it != set)) {
+        set.insert(set_it->begin(), set_it->end());
+        set_it->clear();
+        joined = true;
+      }
+    }
+    if (joined) {
+      // Remove empty sets.
+      sets->erase(std::remove_if(sets->begin(), sets->end(),
+                                 [](const std::unordered_set<std::string>& set) { return set.empty(); }),
+                  sets->end());
+    }
+    return joined;
+  };
+
+  while (join_sets(sets)) {
+  }
+}
+
 }  // namespace
+
 OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& config) {
   using namespace lanelet;
   const LaneletMapPtr map = load(osm_file_path, Origin{GPSPoint{config.origin.x(), config.origin.y()}});
@@ -59,17 +124,19 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
     lanes.emplace(lane.id, lane);
   }
 
+  std::unordered_map<Segment::Id, Segment> segments{};
+
   // Fill up segment according their adjacency.
   for (const auto& lane : lanes) {
-    const std::optional<Segment> segment = CreateSegmentForLane(lane.second, lanes);
+    const std::optional<Segment> segment = CreateSegmentForLane(lane.second, lanes, segments);
     if (!segment.has_value()) {
       continue;
     }
-    segments_.emplace(segment->id, std::move(segment.value()));
+    segments.emplace(segment->id, std::move(segment.value()));
   }
 
   // Fill up connections.
-  for (const auto& segment : segments_) {
+  for (const auto& segment : segments) {
     for (const auto& lane : segment.second.lanes) {
       for (const auto& predecessor : lane.predecessors) {
         const Connection connection{predecessor.second, {lane.id, LaneEnd::Which::kStart}};
@@ -81,22 +148,64 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
       }
     }
   }
+
+  // Organize segments into junctions.
+  std::vector<std::unordered_set<std::string>> potential_junction_lanes_set;
+  // Group lanes that belong to a complex junction.
+  for (const auto& segment : segments) {
+    for (const auto& lane : segment.second.lanes) {
+      if (IsPotentialComplexJunction(lane.predecessors)) {
+        // check the lanes in the predecessor and add them to the potential_junction_lanes_set
+        AddLanesToCollectionOfSet(lane.predecessors, &potential_junction_lanes_set);
+      }
+      if (IsPotentialComplexJunction(lane.successors)) {
+        // check the lanes in the successor and add them to the potential_junction_lanes_set
+        AddLanesToCollectionOfSet(lane.successors, &potential_junction_lanes_set);
+      }
+    }
+  }
+
+  // Join the potential junctions that share segments.
+  JoinSetsIfSharedValues(&potential_junction_lanes_set);
+
+  // Create junctions for complex connections.
+  for (const auto& set : potential_junction_lanes_set) {
+    Junction junction;
+    Junction::Id junction_id{""};
+    for (const auto& lane_id : set) {
+      const std::pair<Segment::Id, Segment> id_segment = FindSegmentForLane(lane_id, segments);  // TODO this method.
+      junction.segments.emplace(id_segment);
+      junction.id = junction.id + (junction.id.empty() ? "" : "_") + id_segment.first;
+    }
+    junctions_.insert({junction.id, junction});
+  }
+
+  // Create junctions for the rest of the segments.
+  for (const auto& segment : segments) {
+    if (std::find_if(junctions_.begin(), junctions_.end(),
+                     [&segment](const std::pair<Junction::Id, Junction>& junction) {
+                       return junction.second.segments.find(segment.first) != junction.second.segments.end();
+                     }) == junctions_.end()) {
+      junctions_.insert({segment.first, {segment.first, {segment}}});
+    }
+  }
 }
 
 OSMManager::~OSMManager() = default;
 
-const std::unordered_map<Segment::Id, Segment>& OSMManager::GetOSMSegments() const { return segments_; }
+const std::unordered_map<Junction::Id, Junction>& OSMManager::GetOSMJunctions() const { return junctions_; }
 
 const std::vector<osm::Connection>& OSMManager::GetOSMConnections() const { return connections_; }
 
 std::optional<Segment> OSMManager::CreateSegmentForLane(const Lane& lane,
-                                                        const std::unordered_map<Lane::Id, Lane>& lanes) {
+                                                        const std::unordered_map<Lane::Id, Lane>& lanes,
+                                                        const std::unordered_map<Segment::Id, Segment>& segments) {
   // If segment for this lane is already added then return.
-  if (std::find_if(segments_.begin(), segments_.end(), [&lane](const auto& segment) {
+  if (std::find_if(segments.begin(), segments.end(), [&lane](const auto& segment) {
         return std::find_if(segment.second.lanes.begin(), segment.second.lanes.end(),
                             [&lane_id = lane.id](const auto& seg_lane) { return seg_lane.id == lane_id; }) !=
                segment.second.lanes.end();
-      }) != segments_.end()) {
+      }) != segments.end()) {
     return std::nullopt;
   }
 

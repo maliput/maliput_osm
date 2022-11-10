@@ -55,7 +55,7 @@ RoadGeometryBuilder::RoadGeometryBuilder(std::unique_ptr<osm::OSMManager> osm_ma
 }
 
 std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator()() {
-  const std::unordered_map<osm::Segment::Id, osm::Segment>& osm_segments = osm_manager_->GetOSMSegments();
+  const std::unordered_map<osm::Junction::Id, osm::Junction>& osm_junctions = osm_manager_->GetOSMJunctions();
   const std::vector<osm::Connection>& connections = osm_manager_->GetOSMConnections();
 
   maliput_sparse::builder::RoadGeometryBuilder rg_builder{};
@@ -65,24 +65,27 @@ std::unique_ptr<const maliput::api::RoadGeometry> RoadGeometryBuilder::operator(
       .ScaleLength(builder_configuration_.scale_length)
       .InertialToBackendFrameTranslation(builder_configuration_.inertial_to_backend_frame_translation);
 
-  for (const auto& osm_segment : osm_segments) {
+  for (const auto& osm_junction : osm_junctions) {
     maliput_sparse::builder::JunctionBuilder junction_builder = rg_builder.StartJunction();
-    junction_builder.Id(maliput::api::JunctionId{osm_segment.first});
-    maliput_sparse::builder::SegmentBuilder segment_builder = junction_builder.StartSegment();
-    segment_builder.Id(maliput::api::SegmentId{osm_segment.first});
+    junction_builder.Id(maliput::api::JunctionId{osm_junction.first});
+    for (const auto& osm_segment : osm_junction.second.segments) {
+      maliput_sparse::builder::SegmentBuilder segment_builder = junction_builder.StartSegment();
+      segment_builder.Id(maliput::api::SegmentId{osm_segment.first});
 
-    for (const osm::Lane& osm_lane : osm_segment.second.lanes) {
-      const maliput::api::LaneId lane_id{osm_lane.id};
-      segment_builder.StartLane()
-          .Id(lane_id)
-          .HeightBounds(maliput::api::HBounds{0., 5.})
-          .StartLaneGeometry()
-          .LeftLineString(osm_lane.left)
-          .RightLineString(osm_lane.right)
-          .EndLaneGeometry()
-          .EndLane();
+      for (const osm::Lane& osm_lane : osm_segment.second.lanes) {
+        const maliput::api::LaneId lane_id{osm_lane.id};
+        segment_builder.StartLane()
+            .Id(lane_id)
+            .HeightBounds(maliput::api::HBounds{0., 5.})
+            .StartLaneGeometry()
+            .LeftLineString(osm_lane.left)
+            .RightLineString(osm_lane.right)
+            .EndLaneGeometry()
+            .EndLane();
+      }
+      segment_builder.EndSegment();
     }
-    segment_builder.EndSegment().EndJunction();
+    junction_builder.EndJunction();
   }
   maliput_sparse::builder::BranchPointBuilder bp_builder = rg_builder.StartBranchPoints();
   for (const auto& connection : connections) {
