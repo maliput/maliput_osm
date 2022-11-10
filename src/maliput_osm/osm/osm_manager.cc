@@ -98,10 +98,12 @@ void JoinSetsIfSharedValues(std::vector<std::unordered_set<std::string>>* sets) 
         joined = true;
       }
     }
-    // Remove empty sets.
-    sets->erase(std::remove_if(sets->begin(), sets->end(),
-                               [](const std::unordered_set<std::string>& set) { return set.empty(); }),
-                sets->end());
+    if (joined) {
+      // Remove empty sets.
+      sets->erase(std::remove_if(sets->begin(), sets->end(),
+                                 [](const std::unordered_set<std::string>& set) { return set.empty(); }),
+                  sets->end());
+    }
     return joined;
   };
 
