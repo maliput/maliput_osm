@@ -34,7 +34,7 @@ Refer to [Maliput osm's Online API Documentation](https://maliput.readthedocs.io
 
 ### Supported platforms
 
-Ubuntu Focal Fossa 20.04 LTS.
+Ubuntu Focal Fossa 20.04 LTS, ROS2 Foxy.
 
 ### Binary Installation on Ubuntu
 
