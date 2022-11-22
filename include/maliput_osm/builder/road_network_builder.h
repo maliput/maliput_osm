@@ -114,9 +114,6 @@ static constexpr char const* kPhaseRingBook{"phase_ring_book"};
 ///   - Default: ""
 static constexpr char const* kIntersectionBook{"intersection_book"};
 
-/// @returns A map with the default values for the builder configuration keys.
-std::map<std::string, std::string> GetDefaultParameters();
-
 /// @}
 
 }  // namespace config
