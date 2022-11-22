@@ -33,6 +33,7 @@
 
 #include <maliput/plugin/road_network_loader.h>
 
+#include "maliput_osm/builder/builder_configuration.h"
 #include "maliput_osm/builder/road_network_builder.h"
 
 namespace maliput_osm {
@@ -47,7 +48,7 @@ class RoadNetworkLoader : public maliput::plugin::RoadNetworkLoader {
     return maliput_osm::builder::RoadNetworkBuilder(properties)();
   }
   std::map<std::string, std::string> GetDefaultParameters() const override {
-    return maliput_osm::builder::config::GetDefaultParameters();
+    return builder::BuilderConfiguration{}.ToStringMap();
   }
 };
 

@@ -53,11 +53,6 @@
 
 namespace maliput_osm {
 namespace builder {
-namespace config {
-
-std::map<std::string, std::string> GetDefaultParameters() { return BuilderConfiguration{}.ToStringMap(); }
-
-}  // namespace config
 
 std::unique_ptr<maliput::api::RoadNetwork> RoadNetworkBuilder::operator()() const {
   const BuilderConfiguration builder_config{BuilderConfiguration::FromMap(builder_config_)};
