@@ -46,6 +46,9 @@ class RoadNetworkLoader : public maliput::plugin::RoadNetworkLoader {
       const std::map<std::string, std::string>& properties) const override {
     return maliput_osm::builder::RoadNetworkBuilder(properties)();
   }
+  std::map<std::string, std::string> GetDefaultParameters() const override {
+    return maliput_osm::builder::config::GetDefaultParameters();
+  }
 };
 
 }  // namespace
