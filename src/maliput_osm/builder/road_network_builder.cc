@@ -38,8 +38,8 @@
 #include <maliput/base/manual_range_value_rule_state_provider.h>
 #include <maliput/base/manual_rulebook.h>
 #include <maliput/base/phase_based_right_of_way_rule_state_provider.h>
-#include <maliput/base/phased_discrete_rule_state_provider.h>
 #include <maliput/base/phase_ring_book_loader.h>
+#include <maliput/base/phased_discrete_rule_state_provider.h>
 #include <maliput/base/road_rulebook_loader.h>
 #include <maliput/base/rule_registry.h>
 #include <maliput/base/rule_registry_loader.h>
