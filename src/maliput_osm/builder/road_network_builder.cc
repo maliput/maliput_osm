@@ -39,6 +39,7 @@
 #include <maliput/base/manual_rulebook.h>
 #include <maliput/base/phase_based_right_of_way_rule_state_provider.h>
 #include <maliput/base/phase_ring_book_loader.h>
+#include <maliput/base/phased_discrete_rule_state_provider.h>
 #include <maliput/base/road_rulebook_loader.h>
 #include <maliput/base/rule_registry.h>
 #include <maliput/base/rule_registry_loader.h>
@@ -109,19 +110,19 @@ std::unique_ptr<maliput::api::RoadNetwork> RoadNetworkBuilder::operator()() cons
 
   maliput::log()->trace("Built PhaseRingBook.");
 
-  // TODO(https://github.com/maliput/maliput_osm/issues/12): Populate the providers.
-
   maliput::log()->trace("Building PhaseProvider...");
-  auto manual_phase_provider = std::make_unique<maliput::ManualPhaseProvider>();
+  auto phase_provider = maliput::ManualPhaseProvider::GetDefaultPopulatedManualPhaseProvider(phase_ring_book.get());
   maliput::log()->trace("Built PhaseProvider.");
 
   maliput::log()->trace("Building DiscreteValueRuleStateProvider...");
   auto discrete_value_rule_state_provider =
-      std::make_unique<maliput::ManualDiscreteValueRuleStateProvider>(rule_book.get());
+      maliput::PhasedDiscreteRuleStateProvider::GetDefaultPhasedDiscreteRuleStateProvider(
+          rule_book.get(), phase_ring_book.get(), phase_provider.get());
   maliput::log()->trace("Built DiscreteValueRuleStateProvider.");
 
   maliput::log()->trace("Building RangeValueRuleStateProvider...");
-  auto range_value_rule_state_provider = std::make_unique<maliput::ManualRangeValueRuleStateProvider>(rule_book.get());
+  auto range_value_rule_state_provider =
+      maliput::ManualRangeValueRuleStateProvider::GetDefaultManualRangeValueRuleStateProvider(rule_book.get());
   maliput::log()->trace("Built RangeValueRuleStateProvider.");
 
   maliput::log()->trace("Building IntersectionBook...");
@@ -134,21 +135,21 @@ std::unique_ptr<maliput::api::RoadNetwork> RoadNetworkBuilder::operator()() cons
       !builder_config.intersection_book.has_value()
           ? std::make_unique<maliput::IntersectionBook>(rg.get())
           : maliput::LoadIntersectionBookFromFile(builder_config.intersection_book.value(), *rule_book,
-                                                  *phase_ring_book, rg.get(), manual_phase_provider.get());
+                                                  *phase_ring_book, rg.get(), phase_provider.get());
   maliput::log()->trace("Built IntersectionBook.");
 
   maliput::log()->trace("Building RuleStateProvider...");
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   // We are not supporting old rule api therefore maliput::api::RightOfWayRuleStateProvider class isn't fully set up.
-  auto state_provider = std::make_unique<maliput::PhaseBasedRightOfWayRuleStateProvider>(phase_ring_book.get(),
-                                                                                         manual_phase_provider.get());
+  auto state_provider =
+      std::make_unique<maliput::PhaseBasedRightOfWayRuleStateProvider>(phase_ring_book.get(), phase_provider.get());
 #pragma GCC diagnostic pop
   maliput::log()->trace("Built RuleStateProvider.");
 
   return std::make_unique<maliput::api::RoadNetwork>(
       std::move(rg), std::move(rule_book), std::move(traffic_light_book), std::move(intersection_book),
-      std::move(phase_ring_book), std::move(state_provider), std::move(manual_phase_provider), std::move(rule_registry),
+      std::move(phase_ring_book), std::move(state_provider), std::move(phase_provider), std::move(rule_registry),
       std::move(discrete_value_rule_state_provider), std::move(range_value_rule_state_provider));
 }
 
