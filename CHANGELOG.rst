@@ -2,8 +2,8 @@
 Changelog for package maliput_osm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.1.0 (2022-11-29)
+------------------
 * Uses default providers offered by maliput base. (`#47 <https://github.com/maliput/maliput_osm/issues/47>`_)
 * Provides default parameters for the road network loader. (`#46 <https://github.com/maliput/maliput_osm/issues/46>`_)
 * Improves documentation. (`#45 <https://github.com/maliput/maliput_osm/issues/45>`_)
