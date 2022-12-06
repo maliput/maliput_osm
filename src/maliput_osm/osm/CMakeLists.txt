@@ -2,9 +2,7 @@
 # osm
 ##############################################################################
 add_library(osm
-  connection.cc
   conversions.cc
-  lane.cc
   osm_manager.cc
 )
 add_library(maliput_osm::osm ALIAS osm)
@@ -27,6 +25,7 @@ target_link_libraries(osm
     maliput::api
     maliput::common
     maliput_sparse::geometry
+    maliput_sparse::parser
 )
 
 install(TARGETS osm

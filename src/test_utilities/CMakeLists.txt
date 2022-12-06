@@ -27,6 +27,7 @@ target_link_libraries(test_utilities
     maliput_osm::osm
     maliput_osm::utilities
     maliput_sparse::geometry
+    maliput_sparse::parser
     maliput_sparse::test_utilities
 )
 

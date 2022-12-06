@@ -36,7 +36,8 @@ namespace maliput_osm {
 namespace osm {
 namespace test {
 
-::testing::AssertionResult CompareOSMLane(const Lane& lhs, const Lane& rhs, double tolerance) {
+::testing::AssertionResult CompareOSMLane(const maliput_sparse::parser::Lane& lhs,
+                                          const maliput_sparse::parser::Lane& rhs, double tolerance) {
   if (lhs.id != rhs.id) {
     return ::testing::AssertionFailure() << "Lane ids do not match: " << lhs.id << " != " << rhs.id;
   }
@@ -61,7 +62,8 @@ namespace test {
   return ::testing::AssertionSuccess();
 }
 
-::testing::AssertionResult CompareOSMSegment(const Segment& lhs, const Segment& rhs, double tolerance) {
+::testing::AssertionResult CompareOSMSegment(const maliput_sparse::parser::Segment& lhs,
+                                             const maliput_sparse::parser::Segment& rhs, double tolerance) {
   if (lhs.id != rhs.id) {
     return ::testing::AssertionFailure() << "Segment ids do not match: " << lhs.id << " != " << rhs.id;
   }

@@ -36,8 +36,8 @@
 #include <lanelet2_core/primitives/Lanelet.h>
 #include <lanelet2_io/Io.h>
 #include <maliput_sparse/geometry/line_string.h>
+#include <maliput_sparse/parser/lane.h>
 
-#include "maliput_osm/osm/lane.h"
 #include "osm/utilities/lanelet2.h"
 #include "test_utilities/osm_types_compare.h"
 #include "utilities/utilities.h"
@@ -46,6 +46,9 @@ namespace maliput_osm {
 namespace osm {
 namespace test {
 namespace {
+
+using maliput_sparse::parser::Lane;
+using maliput_sparse::parser::LaneEnd;
 
 static constexpr double kTolerance{1e-6};
 

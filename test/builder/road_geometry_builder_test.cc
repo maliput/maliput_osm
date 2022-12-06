@@ -27,13 +27,13 @@
 // CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#include "maliput_osm/builder/road_geometry_builder.h"
 
 #include <memory>
 #include <string>
 
 #include <gtest/gtest.h>
 #include <maliput/common/assertion_error.h>
+#include <maliput_sparse/loader/road_geometry_loader.h>
 
 #include "maliput_osm/osm/osm_manager.h"
 #include "test_utilities/builder_configuration_for_osm.h"
@@ -58,11 +58,13 @@ TEST_F(RoadGeometryBuilderTest, Test) {
   BuilderConfiguration builder_config;
   builder_config.osm_file = kOSMFilePath;
   auto osm_manager = std::make_unique<osm::OSMManager>(kOSMFilePath, osm::ParserConfig{});
-  std::unique_ptr<RoadGeometryBuilder> dut;
-  ASSERT_NO_THROW(dut = std::make_unique<RoadGeometryBuilder>(std::move(osm_manager), builder_config));
+  std::unique_ptr<maliput_sparse::loader::RoadGeometryLoader> dut;
+  ASSERT_NO_THROW(dut = std::make_unique<maliput_sparse::loader::RoadGeometryLoader>(std::move(osm_manager),
+                                                                                     builder_config.sparse_config));
   std::unique_ptr<const maliput::api::RoadGeometry> road_geometry;
   ASSERT_NO_THROW(road_geometry = (*dut)());
-  EXPECT_THROW(RoadGeometryBuilder(nullptr, builder_config), maliput::common::assertion_error);
+  EXPECT_THROW(maliput_sparse::loader::RoadGeometryLoader(nullptr, builder_config.sparse_config),
+               maliput::common::assertion_error);
 }
 
 // Holds the parameters to be checked.
@@ -148,7 +150,7 @@ class RoadGeometryBuilderBaseTest : public ::testing::TestWithParam<RoadGeometry
 // Tests Junction, Segments and Lanes graph.
 TEST_P(RoadGeometryBuilderBaseTest, TestGraph) {
   std::unique_ptr<const maliput::api::RoadGeometry> dut =
-      builder::RoadGeometryBuilder(std::move(osm_manager_), builder_config_)();
+      maliput_sparse::loader::RoadGeometryLoader(std::move(osm_manager_), builder_config_.sparse_config)();
   ASSERT_NE(dut.get(), nullptr);
 
   // Junctions.
@@ -291,7 +293,7 @@ class BuilderBranchPointTest : public ::testing::TestWithParam<BuilderBranchPoin
     ASSERT_NE(builder_config, std::nullopt);
     auto osm_manager =
         std::make_unique<osm::OSMManager>(builder_config->osm_file, osm::ParserConfig{builder_config->origin});
-    rg_ = builder::RoadGeometryBuilder(std::move(osm_manager), builder_config.value())();
+    rg_ = maliput_sparse::loader::RoadGeometryLoader(std::move(osm_manager), builder_config->sparse_config)();
     expected_connections = GetParam().expected_connections;
   }
 

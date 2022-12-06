@@ -104,7 +104,7 @@ class RoadNetworkBuilderValidatorTest : public ::testing::TestWithParam<RoadNetw
 TEST_P(RoadNetworkBuilderValidatorTest, RoadGeometryBuilding) {
   const std::unique_ptr<maliput::api::RoadNetwork> dut = builder::RoadNetworkBuilder(builder_config_.ToStringMap())();
   ASSERT_NE(dut->road_geometry(), nullptr);
-  EXPECT_EQ(builder_config_.road_geometry_id, dut->road_geometry()->id());
+  EXPECT_EQ(builder_config_.sparse_config.road_geometry_id, dut->road_geometry()->id());
   EXPECT_NO_THROW(maliput::api::ValidateRoadNetwork(
       *dut, {false, true /* Invariants */, false, false, false, false, false, false}));
 }
