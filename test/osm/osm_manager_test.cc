@@ -42,6 +42,9 @@
 #include "utilities/utilities.h"
 
 using maliput_sparse::geometry::LineString3d;
+using maliput_sparse::parser::Junction;
+using maliput_sparse::parser::Lane;
+using maliput_sparse::parser::Segment;
 
 namespace maliput_osm {
 namespace osm {
@@ -84,7 +87,7 @@ class OSMMangerTest : public ::testing::TestWithParam<OSMManagerTestCase> {
 
 TEST_P(OSMMangerTest, Test) {
   const OSMManager dut{kOSMFilePath, kParserConfig};
-  const auto osm_junctions = dut.GetOSMJunctions();
+  const auto osm_junctions = dut.GetJunctions();
   EXPECT_EQ(case_.junctions.size(), osm_junctions.size());
 
   for (const auto& osm_junction : osm_junctions) {

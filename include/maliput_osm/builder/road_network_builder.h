@@ -35,6 +35,7 @@
 
 #include <maliput/api/road_network.h>
 #include <maliput/common/maliput_copyable.h>
+#include <maliput_sparse/loader/config.h>
 
 namespace maliput_osm {
 namespace builder {
@@ -55,14 +56,14 @@ namespace config {
 ///   {"maliput_osm::builder::kLinearTolerance", "1e-3"},
 ///   {"maliput_osm::builder::kAngularTolerance", "1e-3"},
 /// };
-/// auto road_network = maliput_osm::loader::Load<maliput_osm::builder::RoadNetworkBuilder>(builder_configuration);
+/// auto road_network = maliput_osm::builder::RoadNetworkBuilder(builder_configuration)();
 /// @endcode
 ///
 /// @{
 
 /// A string that works as ID of the RoadGeometry.
 ///   - Default: @e "maliput"
-static constexpr char const* kRoadGeometryId{"road_geometry_id"};
+static constexpr char const* kRoadGeometryId{maliput_sparse::loader::config::kRoadGeometryId};
 
 /// Path to the OSM file to be loaded.
 ///   - Default: ""
@@ -77,42 +78,43 @@ static constexpr char const* kOrigin{"origin"};
 
 /// RoadGeometry's linear tolerance.
 ///   - Default: @e "5e-2"
-static constexpr char const* kLinearTolerance{"linear_tolerance"};
+static constexpr char const* kLinearTolerance{maliput_sparse::loader::config::kLinearTolerance};
 
 /// RoadGeometry's angular tolerance.
 ///   - Default: @e "1e-3"
-static constexpr char const* kAngularTolerance{"angular_tolerance"};
+static constexpr char const* kAngularTolerance{maliput_sparse::loader::config::kAngularTolerance};
 
 /// RoadGeometry's scale length.
 ///   - Default: @e "1.0"
-static constexpr char const* kScaleLength{"scale_length"};
+static constexpr char const* kScaleLength{maliput_sparse::loader::config::kScaleLength};
 
 /// Translation from maliput to maliput_osm inertial frame.
 /// The format of the 3-dimensional vector that is expected to be passed
 /// should be {X, Y, Z}. Same format as maliput::math::Vector3 is
 /// serialized.
 ///   - Default: @e "{0., 0., 0.}"
-static constexpr char const* kInertialToBackendFrameTranslation{"inertial_to_backend_frame_translation"};
+static constexpr char const* kInertialToBackendFrameTranslation{
+    maliput_sparse::loader::config::kInertialToBackendFrameTranslation};
 
 /// Path to the configuration file to load a RoadRulebook
 ///   - Default: ""
-static constexpr char const* kRoadRuleBook{"road_rule_book"};
+static constexpr char const* kRoadRuleBook{maliput_sparse::loader::config::kRoadRuleBook};
 
 /// Path to the configuration file to load a RoadRulebook
 ///   - Default: ""
-static constexpr char const* kRuleRegistry{"rule_registry"};
+static constexpr char const* kRuleRegistry{maliput_sparse::loader::config::kRuleRegistry};
 
 /// Path to the configuration file to load a TrafficLightBook
 ///   - Default: ""
-static constexpr char const* kTrafficLightBook{"traffic_light_book"};
+static constexpr char const* kTrafficLightBook{maliput_sparse::loader::config::kTrafficLightBook};
 
 /// Path to the configuration file to load a PhaseRingBook
 ///   - Default: ""
-static constexpr char const* kPhaseRingBook{"phase_ring_book"};
+static constexpr char const* kPhaseRingBook{maliput_sparse::loader::config::kPhaseRingBook};
 
 /// Path to the configuration file to load a IntersectionBook
 ///   - Default: ""
-static constexpr char const* kIntersectionBook{"intersection_book"};
+static constexpr char const* kIntersectionBook{maliput_sparse::loader::config::kIntersectionBook};
 
 /// @}
 

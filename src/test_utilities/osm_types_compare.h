@@ -31,9 +31,8 @@
 
 #include <gtest/gtest.h>
 #include <maliput_sparse/geometry/line_string.h>
-
-#include "maliput_osm/osm/lane.h"
-#include "maliput_osm/osm/segment.h"
+#include <maliput_sparse/parser/lane.h>
+#include <maliput_sparse/parser/segment.h>
 
 namespace maliput_osm {
 namespace osm {
@@ -44,14 +43,16 @@ namespace test {
 /// @param rhs The right-hand side of the comparison.
 /// @param tolerance The tolerance to use when comparing floating point values.
 /// @returns A Google Test assertion result.
-::testing::AssertionResult CompareOSMLane(const Lane& lhs, const Lane& rhs, double tolerance);
+::testing::AssertionResult CompareOSMLane(const maliput_sparse::parser::Lane& lhs,
+                                          const maliput_sparse::parser::Lane& rhs, double tolerance);
 
 /// Compares two osm::Segment objects.
 /// @param lhs The left-hand side of the comparison.
 /// @param rhs The right-hand side of the comparison.
 /// @param tolerance The tolerance to use when comparing floating point values.
 /// @returns A Google Test assertion result.
-::testing::AssertionResult CompareOSMSegment(const Segment& lhs, const Segment& rhs, double tolerance);
+::testing::AssertionResult CompareOSMSegment(const maliput_sparse::parser::Segment& lhs,
+                                             const maliput_sparse::parser::Segment& rhs, double tolerance);
 
 }  // namespace test
 }  // namespace osm

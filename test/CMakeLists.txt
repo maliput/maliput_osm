@@ -24,6 +24,7 @@ if (TARGET ${target})
         maliput_osm::test_utilities
         maliput_sparse::builder
         maliput_sparse::geometry
+        maliput_sparse::parser
       )
 
     endif()

@@ -29,6 +29,8 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maliput_osm/osm/osm_manager.h"
 
+#include <unordered_set>
+
 #include <lanelet2_io/Io.h>
 #include <lanelet2_io/Projection.h>
 #include <maliput/common/logger.h>
@@ -37,6 +39,13 @@
 
 namespace maliput_osm {
 namespace osm {
+
+using maliput_sparse::parser::Connection;
+using maliput_sparse::parser::Junction;
+using maliput_sparse::parser::Lane;
+using maliput_sparse::parser::LaneEnd;
+using maliput_sparse::parser::Segment;
+
 namespace {
 
 // @param[out] connections
@@ -193,9 +202,9 @@ OSMManager::OSMManager(const std::string& osm_file_path, const ParserConfig& con
 
 OSMManager::~OSMManager() = default;
 
-const std::unordered_map<Junction::Id, Junction>& OSMManager::GetOSMJunctions() const { return junctions_; }
+const std::unordered_map<Junction::Id, Junction>& OSMManager::DoGetJunctions() const { return junctions_; }
 
-const std::vector<osm::Connection>& OSMManager::GetOSMConnections() const { return connections_; }
+const std::vector<osm::Connection>& OSMManager::DoGetConnections() const { return connections_; }
 
 std::optional<Segment> OSMManager::CreateSegmentForLane(const Lane& lane,
                                                         const std::unordered_map<Lane::Id, Lane>& lanes,

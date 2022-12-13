@@ -34,11 +34,12 @@
 #include <unordered_map>
 
 #include <maliput/common/maliput_copyable.h>
+#include <maliput_sparse/parser/connection.h>
+#include <maliput_sparse/parser/junction.h>
+#include <maliput_sparse/parser/lane.h>
+#include <maliput_sparse/parser/parser.h>
+#include <maliput_sparse/parser/segment.h>
 
-#include "maliput_osm/osm/connection.h"
-#include "maliput_osm/osm/junction.h"
-#include "maliput_osm/osm/lane.h"
-#include "maliput_osm/osm/segment.h"
 #include "utilities/id_gen.h"
 
 namespace maliput_osm {
@@ -52,7 +53,7 @@ struct ParserConfig {
 
 /// OSMManager is in charge of loading a Lanelet2-OSM map, parsing it, and providing
 /// accessors to get the map's important data.
-class OSMManager {
+class OSMManager : public maliput_sparse::parser::Parser {
  public:
   MALIPUT_NO_COPY_NO_MOVE_NO_ASSIGN(OSMManager)
 
@@ -63,14 +64,15 @@ class OSMManager {
 
   ~OSMManager();
 
+ private:
   /// Gets the map's junctions.
   /// Junction's ids are generated as combination of the contained segment's ids connected by a "_"
-  const std::unordered_map<Junction::Id, Junction>& GetOSMJunctions() const;
+  const std::unordered_map<maliput_sparse::parser::Junction::Id, maliput_sparse::parser::Junction>& DoGetJunctions()
+      const override;
 
   /// Gets connections between the map's lanes.
-  const std::vector<osm::Connection>& GetOSMConnections() const;
+  const std::vector<maliput_sparse::parser::Connection>& DoGetConnections() const override;
 
- private:
   // Convenient definitions for the AddLanesToSegment method's left parameter.
   // @{
   static constexpr bool kAdjacentLeft{true};
@@ -86,8 +88,10 @@ class OSMManager {
   // lane.
   //
   // @throws maliput::common::assertion_error When the adjacent lane id doesn't match any lane in the @p lanes.
-  static void AddLanesToSegment(const Lane::Id& lane_id, const std::unordered_map<Lane::Id, Lane>& lanes, bool left,
-                                Segment* segment);
+  static void AddLanesToSegment(
+      const maliput_sparse::parser::Lane::Id& lane_id,
+      const std::unordered_map<maliput_sparse::parser::Lane::Id, maliput_sparse::parser::Lane>& lanes, bool left,
+      maliput_sparse::parser::Segment* segment);
 
   // Creates the complete Segment for a given @p lane .
   // The graph is traversed using the lane.left_lane_id and lane.right_lane_id in order to complete the Segment.
@@ -96,17 +100,19 @@ class OSMManager {
   // @param lanes The map of all lanes.
   // @param segments The map of all segments to verify if @p lane already belongs to a segment.
   // @returns A populated Segment or std::nullopt when the lane already belongs to a segment.
-  std::optional<Segment> CreateSegmentForLane(const Lane& lane, const std::unordered_map<Lane::Id, Lane>& lanes,
-                                              const std::unordered_map<Segment::Id, Segment>& segments);
+  std::optional<maliput_sparse::parser::Segment> CreateSegmentForLane(
+      const maliput_sparse::parser::Lane& lane,
+      const std::unordered_map<maliput_sparse::parser::Lane::Id, maliput_sparse::parser::Lane>& lanes,
+      const std::unordered_map<maliput_sparse::parser::Segment::Id, maliput_sparse::parser::Segment>& segments);
 
   // Id generator for the segments.
-  utilities::IdGen<Segment::Id> segment_id_gen_;
+  utilities::IdGen<maliput_sparse::parser::Segment::Id> segment_id_gen_;
 
   // Collection of junctions.
-  std::unordered_map<Junction::Id, Junction> junctions_{};
+  std::unordered_map<maliput_sparse::parser::Junction::Id, maliput_sparse::parser::Junction> junctions_{};
 
   // Collection of connections;
-  std::vector<osm::Connection> connections_{};
+  std::vector<maliput_sparse::parser::Connection> connections_{};
 };
 
 }  // namespace osm

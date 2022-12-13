@@ -38,7 +38,9 @@
 #include <maliput_sparse/geometry/utility/geometry.h>
 
 using maliput_sparse::geometry::LineString3d;
-using namespace maliput_sparse::geometry;
+using maliput_sparse::geometry::utility::Get2DTangentAtP;
+using maliput_sparse::parser::Lane;
+using maliput_sparse::parser::LaneEnd;
 
 namespace maliput_osm {
 namespace osm {
@@ -121,7 +123,7 @@ maliput::math::Vector2 Get2DTangentAtLaneEnd(const lanelet::ConstLanelet lanelet
   // Using left bound as default.
   const LineString3d line_string = ToMaliput(lanelet.leftBound());
   const double p = lane_end_which == LaneEnd::Which::kStart ? 0. : line_string.length();
-  return utility::Get2DTangentAtP(line_string, p);
+  return Get2DTangentAtP(line_string, p);
 }
 
 // Get the delta of the angle between two vectors.
@@ -176,7 +178,7 @@ LineString3d ToMaliput(const lanelet::ConstLineString3d& line_string) {
   return LineString3d{points};
 }
 
-Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletMapPtr& map) {
+maliput_sparse::parser::Lane ToMaliput(const lanelet::Lanelet& lanelet, const lanelet::LaneletMapPtr& map) {
   // Get Id.
   const std::string id = std::to_string(lanelet.id());
   // Get left boundary.
