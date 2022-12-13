@@ -2,6 +2,13 @@
 Changelog for package maliput_osm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Consumes RoadNetworkLoader from maliput_sparse. (`#30 <https://github.com/maliput/maliput_osm/issues/30>`_)
+* Use SPDX identifier in license tag. (`#48 <https://github.com/maliput/maliput_osm/issues/48>`_)
+  This updates the license tag to use the SPDX identifier for the 3 clause BSD license: https://opensource.org/licenses/BSD-3-Clause
+* Contributors: Franco Cipollone, Steven! Ragnarök
+
 0.1.0 (2022-11-29)
 ------------------
 * Uses default providers offered by maliput base. (`#47 <https://github.com/maliput/maliput_osm/issues/47>`_)
