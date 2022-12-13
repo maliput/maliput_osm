@@ -2,8 +2,8 @@
 Changelog for package maliput_osm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.0 (2022-12-13)
+------------------
 * Consumes RoadNetworkLoader from maliput_sparse. (`#30 <https://github.com/maliput/maliput_osm/issues/30>`_)
 * Use SPDX identifier in license tag. (`#48 <https://github.com/maliput/maliput_osm/issues/48>`_)
   This updates the license tag to use the SPDX identifier for the 3 clause BSD license: https://opensource.org/licenses/BSD-3-Clause
