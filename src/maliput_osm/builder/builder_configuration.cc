@@ -29,7 +29,7 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "maliput_osm/builder/builder_configuration.h"
 
-#include "maliput_osm/builder/road_network_builder.h"
+#include "maliput_osm/builder/params.h"
 
 namespace maliput_osm {
 namespace builder {
@@ -38,12 +38,12 @@ BuilderConfiguration BuilderConfiguration::FromMap(const std::map<std::string, s
   BuilderConfiguration builder_config;
   builder_config.sparse_config = maliput_sparse::loader::BuilderConfiguration::FromMap(config);
 
-  auto it = config.find(config::kOsmFile);
+  auto it = config.find(params::kOsmFile);
   if (it != config.end()) {
     builder_config.osm_file = it->second;
   }
 
-  it = config.find(config::kOrigin);
+  it = config.find(params::kOrigin);
   if (it != config.end()) {
     builder_config.origin = maliput::math::Vector2::FromStr(it->second);
   }
@@ -53,8 +53,8 @@ BuilderConfiguration BuilderConfiguration::FromMap(const std::map<std::string, s
 
 std::map<std::string, std::string> BuilderConfiguration::ToStringMap() const {
   std::map<std::string, std::string> config = sparse_config.ToStringMap();
-  config.emplace(config::kOsmFile, osm_file);
-  config.emplace(config::kOrigin, origin.to_str());
+  config.emplace(params::kOsmFile, osm_file);
+  config.emplace(params::kOrigin, origin.to_str());
   return config;
 }
 
