@@ -38,6 +38,7 @@
 #include <maliput/api/road_network_validator.h>
 #include <maliput/common/assertion_error.h>
 
+#include "maliput_osm/builder/params.h"
 #include "test_utilities/builder_configuration_for_osm.h"
 #include "utilities/utilities.h"
 
@@ -135,12 +136,12 @@ class RoadNetworkBuilderPopulationTest : public ::testing::Test {
   const std::string phase_ring_book_path{utilities::FindOSMResource(map_id + ".yaml")};
   const std::string intersection_book_path{utilities::FindOSMResource(map_id + ".yaml")};
   const builder::BuilderConfiguration builder_config{builder::BuilderConfiguration::FromMap({
-      {config::kOsmFile, osm_file_path},
-      {config::kRuleRegistry, rule_registry_path},
-      {config::kRoadRuleBook, road_rulebook_path},
-      {config::kTrafficLightBook, traffic_light_book_path},
-      {config::kPhaseRingBook, phase_ring_book_path},
-      {config::kIntersectionBook, intersection_book_path},
+      {params::kOsmFile, osm_file_path},
+      {params::kRuleRegistry, rule_registry_path},
+      {params::kRoadRuleBook, road_rulebook_path},
+      {params::kTrafficLightBook, traffic_light_book_path},
+      {params::kPhaseRingBook, phase_ring_book_path},
+      {params::kIntersectionBook, intersection_book_path},
   })};
 };
 
