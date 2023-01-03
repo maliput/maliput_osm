@@ -55,6 +55,30 @@ std::optional<builder::BuilderConfiguration> GetBuilderConfigurationFor(const st
            utilities::FindOSMResource("straight_forward.osm"),
            {0., 0.} /* origin */,
        }},
+      {"arc_lane.osm",
+       builder::BuilderConfiguration{
+           {
+               maliput::api::RoadGeometryId{"arc_lane"},
+               5e-2 /* linear_tolerance */,
+               1e-3 /* angular_tolerance */,
+               1. /* scale_length */,
+               kZeroVector,
+           },
+           utilities::FindOSMResource("arc_lane.osm"),
+           {0., 0.} /* origin */,
+       }},
+      {"arc_lane_dense.osm",
+       builder::BuilderConfiguration{
+           {
+               maliput::api::RoadGeometryId{"arc_lane_dense"},
+               5e-2 /* linear_tolerance */,
+               1e-3 /* angular_tolerance */,
+               1. /* scale_length */,
+               kZeroVector,
+           },
+           utilities::FindOSMResource("arc_lane_dense.osm"),
+           {0., 0.} /* origin */,
+       }},
       {"multi_lanes_road.osm",
        builder::BuilderConfiguration{
            {

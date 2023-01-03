@@ -91,6 +91,16 @@ std::vector<RoadGeometryBuilderTestParameters> InstantiateBuilderParameters() {
        {
            {JunctionId("0"), {{{SegmentId("0")}, {LaneId("1006"), LaneId("1010")}}}},
        }},
+      {"arc_lane.osm",
+       "arc_lane",
+       {
+           {JunctionId("0"), {{{SegmentId("0")}, {LaneId("1044"), LaneId("1068")}}}},
+       }},
+      {"arc_lane_dense.osm",
+       "arc_lane_dense",
+       {
+           {JunctionId("0"), {{{SegmentId("0")}, {LaneId("2956"), LaneId("3985")}}}},
+       }},
       {"multi_lanes_road.osm",
        "multi_lanes_road",
        {
