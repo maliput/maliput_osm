@@ -48,6 +48,7 @@ namespace {
 
 static constexpr bool kLeftBound{true};
 static constexpr bool kRightBound{!kLeftBound};
+static constexpr double kTolerance{1e-10};
 
 // Gets the LaneEnd type of @p connected_ls linestring that connects to @ls linestring.
 // @param ls The line string to get the maliput::api::LaneEnd::Which from.
@@ -118,12 +119,12 @@ std::unordered_map<T, U> IntersectMaps(const std::unordered_map<T, U>& map1, con
 // Get the 2d-tangent of the @p lanelet at the selected @p lane_end_which.
 // As the lanelet is defined by left and right boundaries, the tangent of the lanelet is calculated using arbitrarily
 // the left bound.
-maliput::math::Vector2 Get2DTangentAtLaneEnd(const lanelet::ConstLanelet lanelet,
-                                             const LaneEnd::Which& lane_end_which) {
+maliput::math::Vector2 Get2DTangentAtLaneEnd(const lanelet::ConstLanelet lanelet, const LaneEnd::Which& lane_end_which,
+                                             double tolerance) {
   // Using left bound as default.
   const LineString3d line_string = ToMaliput(lanelet.leftBound());
   const double p = lane_end_which == LaneEnd::Which::kStart ? 0. : line_string.length();
-  return Get2DTangentAtP(line_string, p);
+  return Get2DTangentAtP(line_string, p, tolerance);
 }
 
 // Get the delta of the angle between two vectors.
@@ -146,19 +147,21 @@ bool AreLaneEndsAligned(const LaneEnd::Which& lhs, const LaneEnd::Which& rhs) {
 // @param lane_end_which Lane end of the lanelet where the connections are made.
 // @param connections The connections obtained from the geometrical definition of the map.
 // @param lanelet_layer The lanelet layer to get the connected lanelets.
+// @param tolerance The tolerance.
 // @returns The filtered connections.
 std::unordered_map<Lane::Id, LaneEnd> FilterOutByDirection(const lanelet::Lanelet& lanelet,
                                                            const LaneEnd::Which& lane_end_which,
                                                            const std::unordered_map<Lane::Id, LaneEnd>& connections,
-                                                           const lanelet::LaneletLayer& lanelet_layer) {
-  const maliput::math::Vector2 tangent_at_end = Get2DTangentAtLaneEnd(lanelet, lane_end_which);
+                                                           const lanelet::LaneletLayer& lanelet_layer,
+                                                           double tolerance) {
+  const maliput::math::Vector2 tangent_at_end = Get2DTangentAtLaneEnd(lanelet, lane_end_which, tolerance);
   std::unordered_map<Lane::Id, LaneEnd> filtered_connections;
   for (const auto& [connected_lanelet_id, connected_end_which] : connections) {
     const auto to_lanelet_id = [](const std::string& id) { return lanelet::Id{std::stol(id)}; };
     const auto connected_lanelet = lanelet_layer.find(to_lanelet_id(connected_lanelet_id));
     MALIPUT_THROW_UNLESS(connected_lanelet != lanelet_layer.end());
     const maliput::math::Vector2 connected_tangent_at_end =
-        Get2DTangentAtLaneEnd(*connected_lanelet, connected_end_which.end);
+        Get2DTangentAtLaneEnd(*connected_lanelet, connected_end_which.end, tolerance);
 
     const bool aligned = AreLaneEndsAligned(lane_end_which, connected_end_which.end);
     const double angle = GetDiffAngle(tangent_at_end, connected_tangent_at_end * (aligned ? 1. : -1.));
@@ -234,10 +237,11 @@ maliput_sparse::parser::Lane ToMaliput(const lanelet::Lanelet& lanelet, const la
   const auto predecessor_lanelets = FilterOutByDirection(
       lanelet, LaneEnd::Which::kStart,
       find_usage_of_end_points(lanelet.leftBound().front(), lanelet.rightBound().front()) /* predecessors */,
-      *map_layer);
+      *map_layer, kTolerance);
   const auto successor_lanelets = FilterOutByDirection(
       lanelet, LaneEnd::Which::kFinish,
-      find_usage_of_end_points(lanelet.leftBound().back(), lanelet.rightBound().back()) /* successors */, *map_layer);
+      find_usage_of_end_points(lanelet.leftBound().back(), lanelet.rightBound().back()) /* successors */, *map_layer,
+      kTolerance);
 
   return {id, left_bound, right_bound, left_lane_id, right_lane_id, successor_lanelets, predecessor_lanelets};
 }
