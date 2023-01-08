@@ -2,8 +2,8 @@
 Changelog for package maliput_osm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.1 (2023-01-08)
+------------------
 * Matches with changes in maliput_sparse. (`#51 <https://github.com/maliput/maliput_osm/issues/51>`_)
 * Standardize parameters' documentation for the builder. (`#50 <https://github.com/maliput/maliput_osm/issues/50>`_)
 * Contributors: Franco Cipollone
