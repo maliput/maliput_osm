@@ -2,6 +2,12 @@
 Changelog for package maliput_osm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* Matches with changes in maliput_sparse. (`#51 <https://github.com/maliput/maliput_osm/issues/51>`_)
+* Standardize parameters' documentation for the builder. (`#50 <https://github.com/maliput/maliput_osm/issues/50>`_)
+* Contributors: Franco Cipollone
+
 0.2.0 (2022-12-13)
 ------------------
 * Consumes RoadNetworkLoader from maliput_sparse. (`#30 <https://github.com/maliput/maliput_osm/issues/30>`_)
