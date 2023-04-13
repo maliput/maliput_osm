@@ -2,8 +2,8 @@
 Changelog for package maliput_osm
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.2.2 (2023-04-13)
+------------------
 * Adds Town01 map. (`#52 <https://github.com/maliput/maliput_osm/issues/52>`_)
 * Contributors: Franco Cipollone
 
