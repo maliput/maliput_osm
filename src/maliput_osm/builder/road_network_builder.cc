@@ -58,7 +58,7 @@ namespace builder {
 std::unique_ptr<maliput::api::RoadNetwork> RoadNetworkBuilder::operator()() const {
   const BuilderConfiguration builder_config{BuilderConfiguration::FromMap(builder_config_)};
 
-  maliput::log()->info("Loading database from file: {} ...", builder_config.osm_file);
+  maliput::log()->info("Loading database from file: ", builder_config.osm_file, " ...");
 
   std::unique_ptr<maliput_sparse::parser::Parser> osm_manager =
       std::make_unique<osm::OSMManager>(builder_config.osm_file, osm::ParserConfig{builder_config.origin});
