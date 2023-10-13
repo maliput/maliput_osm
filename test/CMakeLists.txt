@@ -16,7 +16,6 @@ if (TARGET ${target})
         maliput::api
         maliput::common
         maliput::plugin
-        maliput::test_utilities
         maliput_osm::builder
         maliput_osm::osm
         maliput_osm::osm_utilities
