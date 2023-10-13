@@ -29,7 +29,6 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "test_utilities/osm_types_compare.h"
 
-#include <maliput/test_utilities/maliput_math_compare.h>
 #include <maliput_sparse/test_utilties/maliput_sparse_types_compare.h>
 
 namespace maliput_osm {
