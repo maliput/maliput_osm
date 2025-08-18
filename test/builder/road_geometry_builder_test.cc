@@ -32,7 +32,7 @@
 #include <string>
 
 #include <gtest/gtest.h>
-#include <maliput/common/assertion_error.h>
+#include <maliput/common/error.h>
 #include <maliput_sparse/loader/road_geometry_loader.h>
 
 #include "maliput_osm/osm/osm_manager.h"

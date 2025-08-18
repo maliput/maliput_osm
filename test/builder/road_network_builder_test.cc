@@ -36,7 +36,7 @@
 #include <gtest/gtest.h>
 #include <maliput/api/road_network.h>
 #include <maliput/api/road_network_validator.h>
-#include <maliput/common/assertion_error.h>
+#include <maliput/common/error.h>
 
 #include "maliput_osm/builder/params.h"
 #include "test_utilities/builder_configuration_for_osm.h"
