@@ -73,6 +73,9 @@ class OSMManager : public maliput_sparse::parser::Parser {
   /// Gets connections between the map's lanes.
   const std::vector<maliput_sparse::parser::Connection>& DoGetConnections() const override;
 
+  /// Gets the geo reference information parsed from the input description.
+  const std::string& DoGetGeoReferenceInfo() const override;
+
   // Convenient definitions for the AddLanesToSegment method's left parameter.
   // @{
   static constexpr bool kAdjacentLeft{true};
