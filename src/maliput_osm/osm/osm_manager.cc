@@ -245,5 +245,12 @@ void OSMManager::AddLanesToSegment(const Lane::Id& lane_id, const std::unordered
   }
 }
 
+const std::string& OSMManager::DoGetGeoReferenceInfo() const {
+  maliput::log()->info("Geo reference information is not yet implemented for OSM maps. Returning empty string.");
+  // Not yet implemented
+  static const std::string empty_geo_ref = "";
+  return empty_geo_ref;
+}
+
 }  // namespace osm
 }  // namespace maliput_osm
