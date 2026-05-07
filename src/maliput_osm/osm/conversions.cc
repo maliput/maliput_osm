@@ -243,8 +243,8 @@ maliput_sparse::parser::Lane ToMaliput(const lanelet::Lanelet& lanelet, const la
       find_usage_of_end_points(lanelet.leftBound().back(), lanelet.rightBound().back()) /* successors */, *map_layer,
       kTolerance);
 
-  return {id,           left_bound,   right_bound,  left_lane_id,       right_lane_id,
-          std::nullopt, std::nullopt, std::nullopt, {}, {}, successor_lanelets, predecessor_lanelets};
+  return {id,           left_bound,   right_bound, left_lane_id, right_lane_id,      std::nullopt,
+          std::nullopt, std::nullopt, {},          {},           successor_lanelets, predecessor_lanelets};
 }
 
 }  // namespace osm
